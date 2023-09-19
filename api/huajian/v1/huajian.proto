@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package helloworld.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/ZLSMDB/lsmdb_server/api/huajian/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.huajian.v1";
+option java_outer_classname = "HuajianProtoV1";
+
+// The huajian service definition.
+service Huajian {
+  // Sends a greeting
+  rpc GetModel (GetModelRequest) returns (GetModelReply) {
+    option (google.api.http) = {
+      get: "/get/{db_name}/{key}"
+    };
+  }
+}
+
+// The request message containing the db's name.
+message GetModelRequest {
+  string db_name = 1;
+  string key = 2;
+}
+
+// The response message containing the greetings
+message GetModelReply {
+  bytes value = 1;
+}

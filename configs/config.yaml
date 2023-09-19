@@ -1,0 +1,32 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9001
+    timeout: 1s
+data:
+  database:
+    driver: mysql
+    source: root:root@tcp(127.0.0.1:3306)/test
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+  etcd:
+    username: root
+    password: password
+    cluster_addrs: ["127.0.0.1:2479", "127.0.0.1:2579", "127.0.0.1:2679"]
+  leveldb:
+    cache_dir: "/home/tsand/go_code/lsmdb/"
+    temp_dir: "/data/db/"
+    block_size: 32
+    compaction_table_size: 32
+    iterator_sampling_rate: 4
+    write_buffer: 32
+  oss:
+    endpoint: 127.0.0.1:9000
+    access_key: 27KULDvjHJ007EelkpbF
+    secret_key: ss0n04PLi2EZk25E3HP16odwuF1ums4VNT1R7IWB
+    region: "cn-north-1"
+

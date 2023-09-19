@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package etcd.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/ZLSMDB/lsmdb_server/api/etcd/v1;v1";
+
+service Etcd {
+  rpc Put (EtcdPutRequest) returns (EtcdPutReply) {
+    option (google.api.http) = {
+      post: "/etcd/put"
+      body: "*"
+    };
+  }
+
+  rpc Get (EtcdGetRequest) returns (EtcdGetReply) {
+    option (google.api.http) = {
+      post: "/etcd/get"
+      body: "*"
+    };
+  }
+}
+
+message EtcdPutRequest {
+  string key = 1;
+  string value = 2;
+}
+
+message EtcdPutReply {
+  bool value = 1;
+}
+
+message EtcdGetRequest {
+  string key = 1;
+}
+
+message EtcdGetReply {
+  string value = 1;
+}
+
