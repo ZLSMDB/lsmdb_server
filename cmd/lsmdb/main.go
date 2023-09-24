@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
@@ -75,12 +76,12 @@ func main() {
 		panic(err)
 	}
 	var ldb *leveldb.DB
-	app, cleanup, err := wireApp(bc.Server, bc.Data, logger, ldb)
+	app, cleanup, err := wireApp(&bc, bc.Server, bc.Data, logger, ldb)
 	if err != nil {
 		panic(err)
 	}
 	defer cleanup()
-
+	fmt.Println("addr is ", bc.Server.Grpc.Addr)
 	// start and wait for stop signal
 	if err := app.Run(); err != nil {
 		panic(err)

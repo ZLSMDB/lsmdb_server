@@ -30,3 +30,4 @@ data:
     secret_key: ss0n04PLi2EZk25E3HP16odwuF1ums4VNT1R7IWB
     region: "cn-north-1"
 
+  node_name: node1

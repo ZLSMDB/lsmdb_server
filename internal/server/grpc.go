@@ -2,7 +2,8 @@ package server
 
 import (
 	etcdV1 "github.com/ZLSMDB/lsmdb_server/api/etcd/v1"
-	v1 "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
+	lsmdbv1 "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
+	registerv1 "github.com/ZLSMDB/lsmdb_server/api/register/v1"
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/ZLSMDB/lsmdb_server/internal/service"
 
@@ -12,7 +13,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, lsmdbs *service.LsmdbService, etcd *service.EtcdService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, lsmdbs *service.LsmdbService, etcd *service.EtcdService, register *service.RegisterService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -28,7 +29,8 @@ func NewGRPCServer(c *conf.Server, lsmdbs *service.LsmdbService, etcd *service.E
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterLsmdbServer(srv, lsmdbs)
+	lsmdbv1.RegisterLsmdbServer(srv, lsmdbs)
 	etcdV1.RegisterEtcdServer(srv, etcd)
+	registerv1.RegisterRegisterServer(srv, register)
 	return srv
 }

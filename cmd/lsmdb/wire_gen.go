@@ -24,7 +24,7 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger, db *leveldb.DB) (*kratos.App, func(), error) {
+func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.Data, logger log.Logger, db *leveldb.DB) (*kratos.App, func(), error) {
 	levelDBRepo := data.NewLevelDBRepo(confData, db, logger)
 	levelDBUsecase := biz.NewLevelDBUsecase(levelDBRepo, logger)
 	client := data.NewEtcdCli(confData)
@@ -40,8 +40,9 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger, db
 	ossUsecase := biz.NewOssUsecase(ossRepo, logger)
 	lsmdbService := service.NewLsmdbService(levelDBUsecase, logger, etcdUsecase, ossUsecase)
 	etcdService := service.NewEtcdService(etcdUsecase)
-	grpcServer := server.NewGRPCServer(confServer, lsmdbService, etcdService, logger)
-	httpServer := server.NewHTTPServer(confServer, lsmdbService, etcdService, logger)
+	registerService := service.NewRegisterService(bootstrap, etcdUsecase, logger)
+	grpcServer := server.NewGRPCServer(confServer, lsmdbService, etcdService, registerService, logger)
+	httpServer := server.NewHTTPServer(confServer, lsmdbService, etcdService, registerService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

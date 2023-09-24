@@ -32,3 +32,21 @@ func SendData(value []byte, err error, conn net.Conn) error {
 	_, e := conn.Write(append([]byte(fmt.Sprintf("%d ", len(value))), value...))
 	return e
 }
+
+func GetIPAddr() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		fmt.Println("get IPv4 address fail", err)
+		return "", err
+	}
+	var ipAddr *net.IPNet
+	for _, addr := range addrs {
+		// 检查是否是IP地址，并且不是回环地址
+		if ipAddr, ok := addr.(*net.IPNet); ok && !ipAddr.IP.IsLoopback() {
+			if ipAddr.IP.To4() != nil {
+				fmt.Println("IPv4 Address:", ipAddr.IP.String())
+			}
+		}
+	}
+	return ipAddr.IP.String(), nil
+}

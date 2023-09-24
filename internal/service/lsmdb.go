@@ -40,7 +40,9 @@ func (s *LsmdbService) Put(ctx context.Context, req *pb.PutRequest) (*pb.PutRepl
 		if err != nil {
 			s.log.Errorf("put key: %s to s3 fail", req.Key)
 		}
-		s.ucEtcd.Put(req.Key, s.dbName) // 转化成key-addr更好， key前需要加一个前缀证明是直接存在上
+		// 转化成key-addr更好， key前需要加一个前缀证明是直接存在上
+		s.ucEtcd.Put(req.Key, s.dbName, nil)
+
 		// 中
 		return &pb.PutReply{Data: true}, nil
 	}
@@ -61,7 +63,7 @@ func (s *LsmdbService) PutStr(ctx context.Context, req *pb.PutStrRequest) (*pb.P
 			s.log.Errorf("put key: %s to s3 fail", req.Key)
 		}
 		// TODO 存在key同名问题, key + dbname作为key, 还得区分是在lsmdb中还是oss中
-		err = s.ucEtcd.Put(fmt.Sprintf("index/%s/%s", s.dbName, req.Key), "oss") // 转化成key-addr更好， key前需要加一个前缀证明是直接存在上
+		err = s.ucEtcd.Put(fmt.Sprintf("index/%s/%s", s.dbName, req.Key), "oss", nil) // 转化成key-addr更好， key前需要加一个前缀证明是直接存在上
 		// 中
 		return &pb.PutStrReply{Data: true}, err
 	}

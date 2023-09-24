@@ -64,5 +64,6 @@ message Leveldb {
   Etcd etcd = 3;
   OSS oss = 4;
   Leveldb leveldb = 5;
+  string node_name = 6; // 节点号，如node1
 }
 

@@ -1,8 +1,9 @@
 package server
 
 import (
-	v1 "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
 	etcdV1 "github.com/ZLSMDB/lsmdb_server/api/etcd/v1"
+	lsmdbv1 "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
+	registerv1 "github.com/ZLSMDB/lsmdb_server/api/register/v1"
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/ZLSMDB/lsmdb_server/internal/service"
 
@@ -12,7 +13,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, lsmdbs *service.LsmdbService, etcd *service.EtcdService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, lsmdbs *service.LsmdbService, etcd *service.EtcdService, register *service.RegisterService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -28,7 +29,8 @@ func NewHTTPServer(c *conf.Server, lsmdbs *service.LsmdbService, etcd *service.E
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
-	v1.RegisterLsmdbHTTPServer(srv, lsmdbs)
+	lsmdbv1.RegisterLsmdbHTTPServer(srv, lsmdbs)
 	etcdV1.RegisterEtcdHTTPServer(srv, etcd)
+	registerv1.RegisterRegisterHTTPServer(srv, register)
 	return srv
 }

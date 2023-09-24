@@ -23,8 +23,8 @@ func NewEtcdRepo(data *Data, logger log.Logger) biz.EtcdRepo {
 	}
 }
 
-func (e *etcdRepo) Put(ctx context.Context, key, value string) error {
-	_, err := e.data.etcd.Put(ctx, key, value)
+func (e *etcdRepo) Put(ctx context.Context, key, value string, opt any) error {
+	_, err := e.data.etcd.Put(ctx, key, value, opt.(clientv3.OpOption))
 	if err != nil {
 		e.log.Errorf("etcd: put data err: %v", err)
 	}
@@ -86,4 +86,17 @@ func (e *etcdRepo) GetDBAddr(dbName string) string {
 		return value[randNum]
 	}
 	return string(dbname)
+}
+
+// 获取租约ID
+func (e *etcdRepo) Grant(ctx context.Context, ttl int64) (clientv3.LeaseID, error) {
+	resp, err := e.data.etcd.Grant(ctx, ttl)
+	return resp.ID, err
+}
+
+// 续租
+
+func (e *etcdRepo) KeepAliveOnce(ctx context.Context, leaseID clientv3.LeaseID) error {
+	_, err := e.data.etcd.KeepAliveOnce(ctx, leaseID)
+	return err
 }

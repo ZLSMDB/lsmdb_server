@@ -17,7 +17,7 @@ func NewEtcdService(etcd *biz.EtcdUsecase) *EtcdService {
 }
 
 func (s *EtcdService) Put(ctx context.Context, req *pb.EtcdPutRequest) (*pb.EtcdPutReply, error) {
-	if err := s.ucEtcd.Put(req.Key, req.Value); err != nil {
+	if err := s.ucEtcd.Put(req.Key, req.Value, nil); err != nil {
 		return &pb.EtcdPutReply{Value: false}, err
 	}
 	return &pb.EtcdPutReply{Value: true}, nil
