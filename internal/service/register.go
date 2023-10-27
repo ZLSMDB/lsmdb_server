@@ -31,13 +31,13 @@ func NewRegisterService(conf *conf.Bootstrap, etcdUc *biz.EtcdUsecase, logger lo
 	if err != nil {
 		srv.log.Errorf("grant lease ID fail:", err)
 		panic(err)
-	}
+	}/*  */
 	err = srv.etcdUc.Put(fmt.Sprintf("node/%s", srv.conf.Data.NodeName), nodeIPAddr, clientv3.WithLease(leaseID))
 	if err != nil {
 		srv.log.Errorf("Failed to register node:", err)
 		panic(err)
 	}
-	srv.log.Info("Node %s registered with IP %s\n", srv.conf.Data.NodeName, nodeIPAddr)
+	srv.log.Info("Node %v registered with IP %v\n", srv.conf.Data.NodeName, nodeIPAddr)
 	// 定时发送心跳
 	go func() {
 		for {
