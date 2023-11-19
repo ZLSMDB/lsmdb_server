@@ -6,6 +6,7 @@ import (
 
 	pb "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
 	"github.com/ZLSMDB/lsmdb_server/internal/biz"
+	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/ZLSMDB/lsmdb_server/internal/data"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -16,12 +17,13 @@ type LsmdbService struct {
 	ucS3   *biz.OssUsecase
 	ucEtcd *biz.EtcdUsecase
 	dbName string
+	conf   *conf.Bootstrap
 	log    *log.Helper
 }
 
-func NewLsmdbService(uc *biz.LevelDBUsecase, logger log.Logger, etcd *biz.EtcdUsecase, oss *biz.OssUsecase) *LsmdbService {
-	svc := &LsmdbService{uc: uc, log: log.NewHelper(logger), ucEtcd: etcd, ucS3: oss}
-	svc.OpenDB(context.Background(), &pb.OpenDBRequest{DbName: "node1"})
+func NewLsmdbService(uc *biz.LevelDBUsecase, logger log.Logger, etcd *biz.EtcdUsecase, oss *biz.OssUsecase, conf *conf.Bootstrap) *LsmdbService {
+	svc := &LsmdbService{uc: uc, log: log.NewHelper(logger), ucEtcd: etcd, ucS3: oss, conf: conf}
+	svc.OpenDB(context.Background(), &pb.OpenDBRequest{DbName: svc.conf.Data.NodeName})
 	return svc
 }
 

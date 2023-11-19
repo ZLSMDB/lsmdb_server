@@ -38,7 +38,7 @@ func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.
 	etcdUsecase := biz.NewEtcdUsecase(etcdRepo, logger)
 	ossRepo := data.NewOssRepo(dataData, logger)
 	ossUsecase := biz.NewOssUsecase(ossRepo, logger)
-	lsmdbService := service.NewLsmdbService(levelDBUsecase, logger, etcdUsecase, ossUsecase)
+	lsmdbService := service.NewLsmdbService(levelDBUsecase, logger, etcdUsecase, ossUsecase, bootstrap)
 	etcdService := service.NewEtcdService(etcdUsecase)
 	registerService := service.NewRegisterService(bootstrap, etcdUsecase, logger)
 	grpcServer := server.NewGRPCServer(confServer, lsmdbService, etcdService, registerService, logger)
