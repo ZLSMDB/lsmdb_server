@@ -20,7 +20,9 @@ type LsmdbService struct {
 }
 
 func NewLsmdbService(uc *biz.LevelDBUsecase, logger log.Logger, etcd *biz.EtcdUsecase, oss *biz.OssUsecase) *LsmdbService {
-	return &LsmdbService{uc: uc, log: log.NewHelper(logger), ucEtcd: etcd, ucS3: oss}
+	svc := &LsmdbService{uc: uc, log: log.NewHelper(logger), ucEtcd: etcd, ucS3: oss}
+	svc.OpenDB(context.Background(), &pb.OpenDBRequest{DbName: "node1"})
+	return svc
 }
 
 func (s *LsmdbService) OpenDB(ctx context.Context, req *pb.OpenDBRequest) (*pb.OpenDBReply, error) {
