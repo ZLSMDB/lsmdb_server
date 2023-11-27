@@ -125,7 +125,7 @@ func (l *leveldbRepo) Set(key string, value []byte) error {
 func (l *leveldbRepo) Get(key string) ([]byte, error) {
 	data, err := l.leveldb.Get([]byte(key), nil)
 	if err != nil {
-		l.log.Errorf("get key %s value fail", key)
+		l.log.Errorf("get key %s value fail, err %v", key, err)
 		return nil, err
 	}
 	return data, nil
