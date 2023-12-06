@@ -15,7 +15,15 @@ service Lsmdb {
       body: "*"
     };
   }
-
+  
+  /*
+   rpc Put (stream PutRequest) returns (PutReply) {
+    option (google.api.http) = {
+      post: "/lsmdb/put"
+      body: "*"
+    };
+  }
+  */
   rpc Put (PutRequest) returns (PutReply) {
     option (google.api.http) = {
       post: "/lsmdb/put"
@@ -30,9 +38,16 @@ service Lsmdb {
     };
   }
 
-  rpc Get (GetRequest) returns (GetReply) {
+  /*
+    rpc Get (GetRequest) returns (stream GetReply) {
     option (google.api.http) = {
       get: "/lsmdb/get/{key}"
+    };
+  }
+  */
+  rpc Get (GetRequest) returns (GetReply) {
+    option (google.api.http) = {
+      get: "/lsmdb/get/{key}"/*  */
     };
   }
 }
