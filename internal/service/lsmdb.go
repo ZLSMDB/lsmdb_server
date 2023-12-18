@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"io"
 
 	pb "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
 	"github.com/ZLSMDB/lsmdb_server/internal/biz"
@@ -36,9 +37,9 @@ func (s *LsmdbService) OpenDB(ctx context.Context, req *pb.OpenDBRequest) (*pb.O
 	return &pb.OpenDBReply{Value: true}, nil
 }
 
-func (s *LsmdbService) Put(ctx context.Context, req *pb.PutRequest) (*pb.PutReply, error) {
+func (s *LsmdbService) Put(stream pb.Lsmdb_PutServer) error {
 	// 分流调用oss存储大文件，需要记录当前bucketname的名字, etcd中存储格式为{key: data{dbname, bucketname}}
-	fmt.Println(req.Key)
+	// fmt.Println(req.Key)
 	// if len(req.Value) > 64*data.MiB {
 	// 	// put to oss and etcd.
 	// 	err := s.ucS3.PutBytes(s.dbName, req.Key, req.Value)
@@ -50,12 +51,26 @@ func (s *LsmdbService) Put(ctx context.Context, req *pb.PutRequest) (*pb.PutRepl
 	// 	// 中
 	// 	return &pb.PutReply{Data: true}, nil
 	// }
-	err := s.uc.Set(req.Key, req.Value)
-	if err != nil {
-		s.log.Errorf("put key-value <%v> fail", req.Key)
-		return &pb.PutReply{Data: false}, err
+	// err := s.uc.Set(req.Key, req.Value)
+	// if err != nil {
+	// 	s.log.Errorf("put key-value <%v> fail", req.Key)
+	// 	return &pb.PutReply{Data: false}, err
+	// }
+	// return &pb.PutReply{Data: true}, nil
+	for {
+		recv, err := stream.Recv()
+		if err != nil {
+			return err
+		}
+		if err == io.EOF {
+			fmt.Println("stream closed")
+			err = stream.SendAndClose(&pb.PutReply{Data: true})
+		}
+		err = s.uc.Set(recv.Key, recv.Value)
+		if err != nil {
+			return err
+		}
 	}
-	return &pb.PutReply{Data: true}, nil
 }
 
 func (s *LsmdbService) PutStr(ctx context.Context, req *pb.PutStrRequest) (*pb.PutStrReply, error) {
@@ -79,11 +94,22 @@ func (s *LsmdbService) PutStr(ctx context.Context, req *pb.PutStrRequest) (*pb.P
 	return &pb.PutStrReply{Data: true}, nil
 }
 
-func (s *LsmdbService) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetReply, error) {
+func (s *LsmdbService) Get(req *pb.GetRequest, stream pb.Lsmdb_GetServer) error {
 	// if s.ucEtcd.Get(fmt.Sprintf("index/%s/%s", s.dbName, req.Key)) == "oss" {
 	// 	value, err := s.ucS3.GetBytes(s.dbName, req.Key)
 	// 	return &pb.GetReply{Value: value}, err
 	// }
+	// value, err := s.uc.Get(req.Key)
+	// return &pb.GetReply{Value: value}, err
 	value, err := s.uc.Get(req.Key)
-	return &pb.GetReply{Value: value}, err
+	if err != nil {
+		return err
+	}
+	// 构造并发送响应
+	reply := &pb.GetReply{Value: value}
+	if err := stream.Send(reply); err != nil {
+		return err
+	}
+
+	return nil
 }

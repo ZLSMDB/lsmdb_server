@@ -16,15 +16,7 @@ service Lsmdb {
     };
   }
   
-  /*
-   rpc Put (stream PutRequest) returns (PutReply) {
-    option (google.api.http) = {
-      post: "/lsmdb/put"
-      body: "*"
-    };
-  }
-  */
-  rpc Put (PutRequest) returns (PutReply) {
+  rpc Put (stream PutRequest) returns (PutReply) {
     option (google.api.http) = {
       post: "/lsmdb/put"
       body: "*"
@@ -38,16 +30,9 @@ service Lsmdb {
     };
   }
 
-  /*
-    rpc Get (GetRequest) returns (stream GetReply) {
+  rpc Get (GetRequest) returns (stream GetReply) {
     option (google.api.http) = {
       get: "/lsmdb/get/{key}"
-    };
-  }
-  */
-  rpc Get (GetRequest) returns (GetReply) {
-    option (google.api.http) = {
-      get: "/lsmdb/get/{key}"/*  */
     };
   }
 }
