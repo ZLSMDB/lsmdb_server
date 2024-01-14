@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package javaDemo.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/ZLSMDB/lsmdb_server/api/javaDemo/v1;v1";
+
+option java_package = "javaDemo/v1";
+option java_generic_services = true;
+option java_multiple_files = true;
+option java_outer_classname = "javaDemoProtoV1";
+
+//定义接口
+service javaDemoService{
+    //一个简单的rpc
+    rpc HelloWorld(HelloRequest) returns (HelloResponse){
+        option (google.api.http) = {
+            post: "/hello"
+        };
+    }
+    //一个客户端流式rpc
+    rpc HelloWorldClientStream(stream HelloRequest) returns (HelloResponse){
+        option (google.api.http) = {
+            post: "/hello/stream"
+        };
+    }
+    //一个客户端和服务器端双向流式rpc
+    rpc HelloWorldClientAndServerStream(stream HelloRequest) returns (stream  HelloResponse){
+        option (google.api.http) = {
+            post: "/hello/bothStream"
+        };
+    }
+}
+
+message HelloRequest{
+    string request = 1;
+}
+//接口返回出参
+message HelloResponse{
+    string response = 1;
+}

@@ -10,7 +10,6 @@ import (
 	"path"
 	"sync"
 	"syscall"
-	"time"
 
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/tsandl/skvdb/leveldb/storage"
@@ -35,7 +34,6 @@ type S3StorageLock struct {
 }
 
 func (lock *S3StorageLock) Unlock() {
-	log.Println("Unlock")
 	ms := lock.ms
 	ms.objStore.Remove("LOCK")
 	if ms.slock == lock {
@@ -56,7 +54,6 @@ type S3Storage struct {
 
 // NewS3Storage 返回一个基于S3接口的存储实现
 func NewS3Storage(opt OpenOption) (storage.Storage, error) {
-	rand.Seed(int64(time.Now().Nanosecond()))
 	s3Client, err := GetS3Client(opt)
 	if err != nil {
 		return nil, err
@@ -87,7 +84,6 @@ func (ms *S3Storage) uploadFiles() error {
 		if err != nil {
 			return err
 		}
-		log.Println("Upload", fullName)
 		fd, _ := fsParseName(logF.Name())
 		err = ms.objStore.PutBytes(fd.String(), content)
 		if err != nil {
@@ -100,7 +96,6 @@ func (ms *S3Storage) uploadFiles() error {
 
 // 锁
 func (ms *S3Storage) Lock() (storage.Locker, error) {
-	log.Println("Lock")
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	if ms.slock != nil {
@@ -158,7 +153,6 @@ func (*S3Storage) Log(str string) {}
 
 // 设置元数据
 func (ms *S3Storage) SetMeta(fd storage.FileDesc) error {
-	log.Println("SetMeta", fd)
 	if !storage.FileDescOk(fd) {
 		return storage.ErrInvalidFile
 	}
@@ -176,7 +170,6 @@ func (ms *S3Storage) SetMeta(fd storage.FileDesc) error {
 
 // 获取元数据
 func (ms *S3Storage) GetMeta() (storage.FileDesc, error) {
-	log.Println("GetMeta")
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	if ms.meta.Zero() {
@@ -194,13 +187,11 @@ func (ms *S3Storage) GetMeta() (storage.FileDesc, error) {
 	if ms.meta.Zero() {
 		return storage.FileDesc{}, os.ErrNotExist
 	}
-	log.Println("GetMeta", ms.meta)
 	return ms.meta, nil
 }
 
 // 列举 storage中文件信息
 func (ms *S3Storage) List(ft storage.FileType) ([]storage.FileDesc, error) {
-	log.Println("List", ft)
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	fdsAll, err := ms.objStore.List()
@@ -218,7 +209,6 @@ func (ms *S3Storage) List(ft storage.FileType) ([]storage.FileDesc, error) {
 
 // 根据FileDesc打开blockserver与minio的联系，读数据
 func (ms *S3Storage) Open(fd storage.FileDesc) (storage.Reader, error) {
-	log.Println("Open", fd)
 	if !storage.FileDescOk(fd) {
 		return nil, storage.ErrInvalidFile
 	}
@@ -245,7 +235,6 @@ func (ms *S3Storage) Open(fd storage.FileDesc) (storage.Reader, error) {
 
 // 向minio中写入数据
 func (ms *S3Storage) Create(fd storage.FileDesc) (storage.Writer, error) {
-	log.Println("Create", fd)
 	if !storage.FileDescOk(fd) {
 		return nil, storage.ErrInvalidFile
 	}
@@ -267,7 +256,6 @@ func (ms *S3Storage) Create(fd storage.FileDesc) (storage.Writer, error) {
 
 // 删除数据
 func (ms *S3Storage) Remove(fd storage.FileDesc) error {
-	log.Println("Remove", fd)
 	if !storage.FileDescOk(fd) {
 		return storage.ErrInvalidFile
 	}
@@ -283,7 +271,6 @@ func (ms *S3Storage) Remove(fd storage.FileDesc) error {
 }
 
 func (ms *S3Storage) Rename(oldfd, newfd storage.FileDesc) error {
-	log.Println("Rename", oldfd, newfd)
 	if !storage.FileDescOk(oldfd) || !storage.FileDescOk(newfd) {
 		return storage.ErrInvalidFile
 	}
@@ -312,7 +299,6 @@ type memReader struct {
 }
 
 func (mr *memReader) Close() error {
-	log.Println("reader Close", mr.fd)
 	mr.ms.mu.Lock()
 	defer mr.ms.mu.Unlock()
 	if mr.closed {
@@ -332,7 +318,6 @@ type memWriter struct {
 
 // 同步
 func (mw *memWriter) Sync() error {
-	log.Println("writer Sync", mw.fd, "len", mw.memFile.Len())
 	if mw.fd.Type == storage.TypeManifest && mw.cacheFile != nil {
 		return mw.cacheFile.Sync()
 	}
@@ -352,8 +337,6 @@ func (mw *memWriter) Write(p []byte) (n int, err error) {
 }
 
 func (mw *memWriter) Close() error {
-	curLen := mw.memFile.Len()
-	log.Println("writer Close", mw.fd, "len", curLen)
 	if mw.cacheFile != nil {
 		tErr := mw.cacheFile.Close()
 		if tErr != nil {

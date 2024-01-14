@@ -59,7 +59,7 @@ func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 	opt.CompactionTableSize = int(l.conf.Leveldb.CompactionTableTize * MiB)
 	opt.IteratorSamplingRate = int(l.conf.Leveldb.IteratorSamplingRate * MiB)
 	opt.WriteBuffer = int(l.conf.Leveldb.WriteBuffer * MiB)
-	opt.BlockSize = int(l.conf.Leveldb.BlockSize)
+	opt.BlockSize = int(l.conf.Leveldb.BlockSize * MiB)
 
 	localPath := l.conf.Leveldb.DataDir + bucketName
 	s3opt := OpenOption{
