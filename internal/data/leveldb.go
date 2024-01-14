@@ -79,8 +79,10 @@ func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 		DisableSSL:       aws.Bool(true),
 		S3ForcePathStyle: aws.Bool(true),
 	}
-	newSession := session.New(s3Config)
-
+	newSession, err := session.NewSession(s3Config)
+	if err != nil {
+		l.log.Errorf("create session fail")
+	}
 	s3Client := awss3.New(newSession)
 	bucket := aws.String(bucketName)
 	cparams := &awss3.CreateBucketInput{
@@ -88,7 +90,7 @@ func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 	}
 
 	//Create a new bucket using the CreateBucket call.
-	_, err := s3Client.CreateBucket(cparams)
+	_, err = s3Client.CreateBucket(cparams)
 
 	if err != nil {
 		errMsg := err.Error()[0:23]
@@ -123,7 +125,7 @@ func (l *leveldbRepo) Set(key string, value []byte) error {
 func (l *leveldbRepo) Get(key string) ([]byte, error) {
 	data, err := l.leveldb.Get([]byte(key), nil)
 	if err != nil {
-		l.log.Errorf("get key %s value fail", key)
+		l.log.Errorf("get key %s value fail, err %v", key, err)
 		return nil, err
 	}
 	return data, nil
@@ -211,15 +213,17 @@ func (l *leveldbRepo) OpenDB(bucketName string) (*leveldb.DB, error) {
 		DisableSSL:       aws.Bool(true),
 		S3ForcePathStyle: aws.Bool(true),
 	}
-	newSession := session.New(s3Config)
-
+	newSession, err := session.NewSession(s3Config)
+	if err != nil {
+		l.log.Errorf("create session fail")
+	}
 	s3Client := awss3.New(newSession)
 	bucket := aws.String(bucketName)
 	cparams := &awss3.CreateBucketInput{
 		Bucket: bucket, // Required
 	}
 
-	_, err := s3Client.CreateBucket(cparams)
+	_, err = s3Client.CreateBucket(cparams)
 
 	if err != nil {
 		errMsg := err.Error()[0:23]
