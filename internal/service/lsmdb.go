@@ -87,3 +87,11 @@ func (s *LsmdbService) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetRepl
 	value, err := s.uc.Get(req.Key)
 	return &pb.GetReply{Value: value}, err
 }
+
+func (s *LsmdbService) CloseDB(ctx context.Context, req *pb.CloseRequest) (*pb.CloseReply, error) {
+
+	if err := s.uc.CloseDB(); err != nil {
+		return &pb.CloseReply{}, err
+	}
+	return &pb.CloseReply{}, nil
+}

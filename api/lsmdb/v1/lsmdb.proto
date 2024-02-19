@@ -50,7 +50,19 @@ service Lsmdb {
       get: "/lsmdb/get/{key}"/*  */
     };
   }
+
+  rpc CloseDB (CloseRequest) returns (CloseReply) {
+    option (google.api.http) = {
+      post: "/lsmdb/close"/*  */
+    };
+  }
 }
+
+message CloseRequest {
+  string db_name = 1;
+}
+
+message CloseReply {}
 
 // 命名必须使用下划线，否则出现传递不了参数的情况
 message OpenDBRequest {

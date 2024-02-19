@@ -251,6 +251,9 @@ func (l *leveldbRepo) OpenDB(bucketName string) (*leveldb.DB, error) {
 // 关闭 DB
 func (l *leveldbRepo) CloseDB() error {
 	var m sync.Mutex
+	if l.leveldb == nil {
+		return nil
+	}
 	m.Lock()
 	err := l.leveldb.Close()
 	m.Unlock()

@@ -24,11 +24,21 @@ func NewEtcdRepo(data *Data, logger log.Logger) biz.EtcdRepo {
 }
 
 func (e *etcdRepo) Put(ctx context.Context, key, value string, opt any) error {
-	_, err := e.data.etcd.Put(ctx, key, value, opt.(clientv3.OpOption))
-	if err != nil {
-		e.log.Errorf("etcd: put data err: %v", err)
+	var err error
+	if opt == nil {
+		_, err = e.data.etcd.Put(ctx, key, value)
+		if err != nil {
+			e.log.Errorf("etcd: put data err: %v", err)
+			return err
+		}
+		return nil
+	} else {
+		_, err = e.data.etcd.Put(ctx, key, value, opt.(clientv3.OpOption))
+		if err != nil {
+			e.log.Errorf("etcd: put data err: %v", err)
+		}
+		return err
 	}
-	return err
 }
 
 func (e *etcdRepo) Get(ctx context.Context, key string) []byte {

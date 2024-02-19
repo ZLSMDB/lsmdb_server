@@ -16,7 +16,8 @@ data:
   etcd:
     username: root
     password: password
-    cluster_addrs: ["127.0.0.1:2479", "127.0.0.1:2579", "127.0.0.1:2679"]
+    cluster_addrs: ["127.0.0.1:2379"]
+    # cluster_addrs: ["127.0.0.1:2479", "127.0.0.1:2579", "127.0.0.1:2679"]
   leveldb:
     cache_dir: "/home/tsand/go_code/db/"
     data_dir: "/"
@@ -29,4 +30,4 @@ data:
     access_key: 27KULDvjHJ007EelkpbF
     secret_key: ss0n04PLi2EZk25E3HP16odwuF1ums4VNT1R7IWB
     region: "cn-north-1"
-  node_name: node2
+  node_name: node1
