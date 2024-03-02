@@ -38,7 +38,6 @@ func (s *LsmdbService) OpenDB(ctx context.Context, req *pb.OpenDBRequest) (*pb.O
 
 func (s *LsmdbService) Put(ctx context.Context, req *pb.PutRequest) (*pb.PutReply, error) {
 	// 分流调用oss存储大文件，需要记录当前bucketname的名字, etcd中存储格式为{key: data{dbname, bucketname}}
-	fmt.Println(req.Key)
 	// if len(req.Value) > 64*data.MiB {
 	// 	// put to oss and etcd.
 	// 	err := s.ucS3.PutBytes(s.dbName, req.Key, req.Value)
@@ -86,4 +85,9 @@ func (s *LsmdbService) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetRepl
 	// }
 	value, err := s.uc.Get(req.Key)
 	return &pb.GetReply{Value: value}, err
+}
+
+func (s *LsmdbService) CloseDB(ctx context.Context, req *pb.CloseDBRequest) (*pb.CloseDBReply, error) {
+	err := s.uc.CloseDB()
+	return &pb.CloseDBReply{}, err
 }

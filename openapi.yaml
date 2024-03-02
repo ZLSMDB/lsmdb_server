@@ -7,10 +7,34 @@ info:
     description: The Lsmdb service definition.
     version: 0.0.1
 paths:
+    /lsmdb/close:
+        post:
+            tags:
+                - Lsmdb
+            operationId: Lsmdb_CloseDB
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CloseDBReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /lsmdb/get/{key}:
         get:
             tags:
                 - Lsmdb
+            description: |-
+                rpc Get (GetRequest) returns (stream GetReply) {
+                option (google.api.http) = {
+                get: "/lsmdb/get/{key}"
+                };
+                }
             operationId: Lsmdb_Get
             parameters:
                 - name: key
@@ -60,6 +84,13 @@ paths:
         post:
             tags:
                 - Lsmdb
+            description: |-
+                rpc Put (stream PutRequest) returns (PutReply) {
+                option (google.api.http) = {
+                post: "/lsmdb/put"
+                body: "*"
+                };
+                }
             operationId: Lsmdb_Put
             requestBody:
                 content:
@@ -106,6 +137,9 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
+        CloseDBReply:
+            type: object
+            properties: {}
         GetReply:
             type: object
             properties:
