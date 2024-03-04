@@ -27,22 +27,18 @@ import (
 func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.Data, logger log.Logger, db *leveldb.DB) (*kratos.App, func(), error) {
 	levelDBRepo := data.NewLevelDBRepo(confData, db, logger)
 	levelDBUsecase := biz.NewLevelDBUsecase(levelDBRepo, logger)
-	client := data.NewEtcdCli(confData)
 	s3 := data.NewS3Cli(confData)
-	redisClient := data.NewRedisCli(confData)
-	dataData, cleanup, err := data.NewData(client, db, s3, redisClient, logger)
+	client := data.NewRedisCli(confData)
+	dataData, cleanup, err := data.NewData(db, s3, client, logger)
 	if err != nil {
 		return nil, nil, err
 	}
-	etcdRepo := data.NewEtcdRepo(dataData, logger)
-	etcdUsecase := biz.NewEtcdUsecase(etcdRepo, logger)
 	ossRepo := data.NewOssRepo(dataData, logger)
 	ossUsecase := biz.NewOssUsecase(ossRepo, logger)
-	lsmdbService := service.NewLsmdbService(levelDBUsecase, logger, etcdUsecase, ossUsecase, bootstrap)
-	etcdService := service.NewEtcdService(etcdUsecase)
-	registerService := service.NewRegisterService(bootstrap, etcdUsecase, logger)
-	grpcServer := server.NewGRPCServer(confServer, lsmdbService, etcdService, registerService, logger)
-	httpServer := server.NewHTTPServer(confServer, lsmdbService, etcdService, registerService, logger)
+	lsmdbService := service.NewLsmdbService(levelDBUsecase, logger, ossUsecase, bootstrap)
+	registerService := service.NewRegisterService(bootstrap, logger)
+	grpcServer := server.NewGRPCServer(confServer, lsmdbService, registerService, logger)
+	httpServer := server.NewHTTPServer(confServer, lsmdbService, registerService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

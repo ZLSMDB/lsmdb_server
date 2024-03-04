@@ -1,7 +1,6 @@
 package server
 
 import (
-	etcdV1 "github.com/ZLSMDB/lsmdb_server/api/etcd/v1"
 	lsmdbv1 "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
 	registerv1 "github.com/ZLSMDB/lsmdb_server/api/register/v1"
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
@@ -18,7 +17,7 @@ const (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, lsmdbs *service.LsmdbService, etcd *service.EtcdService, register *service.RegisterService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, lsmdbs *service.LsmdbService, register *service.RegisterService, logger log.Logger) *grpc.Server {
 	// MAX_MESSAGE_LENGTH := 256*1024*1024  // 可根据具体需求设置，此处设为256M
 	// var opt = []g.ServerOption{
 	// 	g.MaxRecvMsgSize(MAX_MESSAGE_LENGTH),
@@ -46,7 +45,6 @@ func NewGRPCServer(c *conf.Server, lsmdbs *service.LsmdbService, etcd *service.E
 	// opts = append(opts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(size)))
 	srv := grpc.NewServer(opts...)
 	lsmdbv1.RegisterLsmdbServer(srv, lsmdbs)
-	etcdV1.RegisterEtcdServer(srv, etcd)
 	registerv1.RegisterRegisterServer(srv, register)
 	return srv
 }

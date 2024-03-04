@@ -35,13 +35,11 @@ type S3StorageLock struct {
 }
 
 func (lock *S3StorageLock) Unlock() {
-	log.Println("Unlock")
 	ms := lock.ms
 	ms.objStore.Remove("LOCK")
 	if ms.slock == lock {
 		ms.slock = nil
 	}
-	return
 }
 
 // S3Storage is a s3-backed storage.
@@ -54,7 +52,7 @@ type S3Storage struct {
 	opt      OpenOption
 }
 
-// NewS3Storage 返回一个基于S3接口的存储实现
+// NewS3Storage returns a new s3-backed storage implementation.
 func NewS3Storage(opt OpenOption) (storage.Storage, error) {
 	rand.Seed(int64(time.Now().Nanosecond()))
 	s3Client, err := GetS3Client(opt)
@@ -75,7 +73,6 @@ func NewS3Storage(opt OpenOption) (storage.Storage, error) {
 	return ms, nil
 }
 
-// 上传文件
 func (ms *S3Storage) uploadFiles() error {
 	logFiles, _ := os.ReadDir(ms.opt.LocalCacheDir)
 	for _, logF := range logFiles {
@@ -87,7 +84,6 @@ func (ms *S3Storage) uploadFiles() error {
 		if err != nil {
 			return err
 		}
-		log.Println("Upload", fullName)
 		fd, _ := fsParseName(logF.Name())
 		err = ms.objStore.PutBytes(fd.String(), content)
 		if err != nil {
@@ -98,9 +94,7 @@ func (ms *S3Storage) uploadFiles() error {
 	return nil
 }
 
-// 锁
 func (ms *S3Storage) Lock() (storage.Locker, error) {
-	log.Println("Lock")
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	if ms.slock != nil {
@@ -110,7 +104,6 @@ func (ms *S3Storage) Lock() (storage.Locker, error) {
 	if len(cacheDir) > 0 {
 		current, _ := ms.objStore.GetBytes("CURRENT")
 		if len(current) == 0 {
-			log.Println("remove dirty cache files")
 			os.RemoveAll(ms.opt.LocalCacheDir)
 		}
 	}
@@ -156,9 +149,7 @@ func (ms *S3Storage) Lock() (storage.Locker, error) {
 
 func (*S3Storage) Log(str string) {}
 
-// 设置元数据
 func (ms *S3Storage) SetMeta(fd storage.FileDesc) error {
-	log.Println("SetMeta", fd)
 	if !storage.FileDescOk(fd) {
 		return storage.ErrInvalidFile
 	}
@@ -174,9 +165,7 @@ func (ms *S3Storage) SetMeta(fd storage.FileDesc) error {
 	return nil
 }
 
-// 获取元数据
 func (ms *S3Storage) GetMeta() (storage.FileDesc, error) {
-	log.Println("GetMeta")
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	if ms.meta.Zero() {
@@ -194,13 +183,10 @@ func (ms *S3Storage) GetMeta() (storage.FileDesc, error) {
 	if ms.meta.Zero() {
 		return storage.FileDesc{}, os.ErrNotExist
 	}
-	log.Println("GetMeta", ms.meta)
 	return ms.meta, nil
 }
 
-// 列举 storage中文件信息
 func (ms *S3Storage) List(ft storage.FileType) ([]storage.FileDesc, error) {
-	log.Println("List", ft)
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	fdsAll, err := ms.objStore.List()
@@ -216,9 +202,7 @@ func (ms *S3Storage) List(ft storage.FileType) ([]storage.FileDesc, error) {
 	return fds, nil
 }
 
-// 根据FileDesc打开blockserver与minio的联系，读数据
 func (ms *S3Storage) Open(fd storage.FileDesc) (storage.Reader, error) {
-	log.Println("Open", fd)
 	if !storage.FileDescOk(fd) {
 		return nil, storage.ErrInvalidFile
 	}
@@ -243,9 +227,7 @@ func (ms *S3Storage) Open(fd storage.FileDesc) (storage.Reader, error) {
 	return &memReader{Reader: bytes.NewReader(data), ms: ms, m: m, fd: fd}, nil
 }
 
-// 向minio中写入数据
 func (ms *S3Storage) Create(fd storage.FileDesc) (storage.Writer, error) {
-	log.Println("Create", fd)
 	if !storage.FileDescOk(fd) {
 		return nil, storage.ErrInvalidFile
 	}
@@ -265,9 +247,7 @@ func (ms *S3Storage) Create(fd storage.FileDesc) (storage.Writer, error) {
 	return &memWriter{memFile: m, ms: ms, fd: fd, cacheFile: cacheFile}, nil
 }
 
-// 删除数据
 func (ms *S3Storage) Remove(fd storage.FileDesc) error {
-	log.Println("Remove", fd)
 	if !storage.FileDescOk(fd) {
 		return storage.ErrInvalidFile
 	}
@@ -283,7 +263,6 @@ func (ms *S3Storage) Remove(fd storage.FileDesc) error {
 }
 
 func (ms *S3Storage) Rename(oldfd, newfd storage.FileDesc) error {
-	log.Println("Rename", oldfd, newfd)
 	if !storage.FileDescOk(oldfd) || !storage.FileDescOk(newfd) {
 		return storage.ErrInvalidFile
 	}
@@ -312,7 +291,6 @@ type memReader struct {
 }
 
 func (mr *memReader) Close() error {
-	log.Println("reader Close", mr.fd)
 	mr.ms.mu.Lock()
 	defer mr.ms.mu.Unlock()
 	if mr.closed {
@@ -330,16 +308,13 @@ type memWriter struct {
 	cacheFile *os.File
 }
 
-// 同步
 func (mw *memWriter) Sync() error {
-	log.Println("writer Sync", mw.fd, "len", mw.memFile.Len())
 	if mw.fd.Type == storage.TypeManifest && mw.cacheFile != nil {
 		return mw.cacheFile.Sync()
 	}
 	return nil
 }
 
-// 写
 func (mw *memWriter) Write(p []byte) (n int, err error) {
 	n, err = mw.memFile.Write(p)
 	if mw.cacheFile != nil {
@@ -352,8 +327,6 @@ func (mw *memWriter) Write(p []byte) (n int, err error) {
 }
 
 func (mw *memWriter) Close() error {
-	curLen := mw.memFile.Len()
-	log.Println("writer Close", mw.fd, "len", curLen)
 	if mw.cacheFile != nil {
 		tErr := mw.cacheFile.Close()
 		if tErr != nil {

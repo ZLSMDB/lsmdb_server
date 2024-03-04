@@ -59,7 +59,8 @@ func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 	opt.CompactionTableSize = int(l.conf.Leveldb.CompactionTableTize * MiB)
 	opt.IteratorSamplingRate = int(l.conf.Leveldb.IteratorSamplingRate * MiB)
 	opt.WriteBuffer = int(l.conf.Leveldb.WriteBuffer * MiB)
-	opt.BlockSize = int(l.conf.Leveldb.BlockSize)
+	opt.BlockSize = int(l.conf.Leveldb.BlockSize * MiB)
+	opt.BlockCacheCapacity = int(l.conf.Leveldb.BlockSize * MiB)
 
 	localPath := l.conf.Leveldb.DataDir + bucketName
 	s3opt := OpenOption{
@@ -72,36 +73,36 @@ func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 		LocalCacheDir: l.conf.Leveldb.CacheDir,
 	}
 	// to judge bucket is exist
-	s3Config := &aws.Config{
-		Credentials:      credentials.NewStaticCredentials(l.conf.Oss.AccessKey, l.conf.Oss.SecretKey, ""),
-		Endpoint:         aws.String(l.conf.Oss.Endpoint),
-		Region:           aws.String(l.conf.Oss.Region),
-		DisableSSL:       aws.Bool(true),
-		S3ForcePathStyle: aws.Bool(true),
-	}
-	newSession, err := session.NewSession(s3Config)
-	if err != nil {
-		l.log.Errorf("create session fail")
-	}
-	s3Client := awss3.New(newSession)
-	bucket := aws.String(bucketName)
-	cparams := &awss3.CreateBucketInput{
-		Bucket: bucket, // Required
-	}
+	// s3Config := &aws.Config{
+	// 	Credentials:      credentials.NewStaticCredentials(l.conf.Oss.AccessKey, l.conf.Oss.SecretKey, ""),
+	// 	Endpoint:         aws.String(l.conf.Oss.Endpoint),
+	// 	Region:           aws.String(l.conf.Oss.Region),
+	// 	DisableSSL:       aws.Bool(true),
+	// 	S3ForcePathStyle: aws.Bool(true),
+	// }
+	// newSession, err := session.NewSession(s3Config)
+	// if err != nil {
+	// 	l.log.Errorf("create session fail")
+	// }
+	// s3Client := awss3.New(newSession)
+	// bucket := aws.String(bucketName)
+	// cparams := &awss3.CreateBucketInput{
+	// 	Bucket: bucket, // Required
+	// }
 
 	//Create a new bucket using the CreateBucket call.
-	_, err = s3Client.CreateBucket(cparams)
+	// _, err = s3Client.CreateBucket(cparams)
 
-	if err != nil {
-		errMsg := err.Error()[0:23]
-		if errMsg != "BucketAlreadyOwnedByYou" {
-			l.log.Errorf("Bucket already existed, bucket name: %s", errMsg)
-			return err
-		}
-	}
+	// if err != nil {
+	// 	errMsg := err.Error()[0:23]
+	// 	if errMsg != "BucketAlreadyOwnedByYou" {
+	// 		l.log.Errorf("Bucket already existed, bucket name: %s", errMsg)
+	// 		// return err
+	// 	}
+	// }
 	storage, err := NewS3Storage(s3opt)
 	if err != nil {
-		l.log.Errorf("create s3 storage failed: %v", err)
+		l.log.Errorf("create s3 storage failed: because of %v", err)
 		return err
 	}
 	// add lock
@@ -126,7 +127,7 @@ func (l *leveldbRepo) Get(key string) ([]byte, error) {
 	data, err := l.leveldb.Get([]byte(key), nil)
 	if err != nil {
 		l.log.Errorf("get key %s value fail, err %v", key, err)
-		return nil, err
+		return data, err
 	}
 	return data, nil
 }
@@ -193,7 +194,7 @@ func (l *leveldbRepo) OpenDB(bucketName string) (*leveldb.DB, error) {
 	opt.CompactionTableSize = int(l.conf.Leveldb.CompactionTableTize * MiB)
 	opt.IteratorSamplingRate = int(l.conf.Leveldb.IteratorSamplingRate * MiB)
 	opt.WriteBuffer = int(l.conf.Leveldb.WriteBuffer * MiB)
-	opt.BlockSize = int(l.conf.Leveldb.BlockSize)
+	// opt.BlockSize = int(l.conf.Leveldb.BlockSize)
 
 	localPath := l.conf.Leveldb.DataDir + bucketName
 	s3opt := OpenOption{

@@ -1,8 +1,6 @@
 package data
 
 import (
-	"time"
-
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -12,44 +10,26 @@ import (
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
 	"github.com/tsandl/skvdb/leveldb"
-	eCli "go.etcd.io/etcd/client/v3"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewEtcdRepo, NewEtcdCli, NewLevelDBRepo, NewS3Cli, NewOssRepo, NewRedisCli)
+var ProviderSet = wire.NewSet(NewData, NewLevelDBRepo, NewS3Cli, NewOssRepo, NewRedisCli)
 
 // Data .
 type Data struct {
 	// TODO wrapped database client
-	etcd    *eCli.Client
 	leveldb *leveldb.DB
 	osscli  *s3.S3
 	rdb     *redis.Client
 }
 
 // NewData .
-func NewData(etcd *eCli.Client, leveldb *leveldb.DB, s3 *s3.S3, rdb *redis.Client, logger log.Logger) (*Data, func(), error) {
+func NewData(leveldb *leveldb.DB, s3 *s3.S3, rdb *redis.Client, logger log.Logger) (*Data, func(), error) {
 	cleanup := func() {
 		log.NewHelper(logger).Info("closing the data resources")
-		if etcd != nil {
-			log.Info("etcd is not nil")
-		}
-	}
-	return &Data{etcd: etcd, leveldb: leveldb, osscli: s3, rdb: rdb}, cleanup, nil
-}
 
-func NewEtcdCli(c *conf.Data) *eCli.Client {
-	cli, err := eCli.New(eCli.Config{
-		Endpoints:   c.Etcd.ClusterAddrs,
-		DialTimeout: 5 * time.Second,
-		// Username:    c.Etcd.UserName,
-		// Password:    c.Etcd.Password,
-	})
-	if err != nil {
-		log.Errorf("connect etcd fail %v", err)
-		panic(err)
 	}
-	return cli
+	return &Data{leveldb: leveldb, osscli: s3, rdb: rdb}, cleanup, nil
 }
 
 func NewS3Cli(c *conf.Data) *s3.S3 {

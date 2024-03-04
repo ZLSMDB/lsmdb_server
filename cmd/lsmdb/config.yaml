@@ -1,0 +1,33 @@
+server:
+  http:
+    addr: 0.0.0.0:8004
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9004
+    timeout: 1s
+data:
+  database:
+    driver: mysql
+    source: root:root@tcp(127.0.0.1:3306)/test
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+  etcd:
+    username: root
+    password: password
+    #cluster_addrs: ["10.176.34.134:2379", "10.176.34.135:2379", "10.176.34.140:2379"]
+    cluster_addrs: ["127.0.0.1:2379"]
+  leveldb:
+    cache_dir: "/data/lsmdb/tmps/"
+    temp_dir: "/db/"
+    block_size: 32
+    compaction_table_size: 32
+    iterator_sampling_rate: 32
+    write_buffer: 32
+  oss:
+    endpoint: 127.0.0.1:9000
+    access_key: minioadmin
+    secret_key: minioadmin
+    region: "cn-north-1"
+  node_name: node5
