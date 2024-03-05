@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	pb "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
 	"github.com/ZLSMDB/lsmdb_server/internal/biz"
@@ -20,13 +21,19 @@ type LsmdbService struct {
 
 func NewLsmdbService(uc *biz.LevelDBUsecase, logger log.Logger, oss *biz.OssUsecase, conf *conf.Bootstrap) *LsmdbService {
 	svc := &LsmdbService{uc: uc, log: log.NewHelper(logger), ucS3: oss, conf: conf}
+	// if err := svc.uc.NewLevelDBCli(svc.conf.Data.NodeName); err != nil {
+	// 	svc.log.Errorf("open db %v fail because of %v", svc.conf.Data.NodeName, err)
+	// 	return nil
+	// }
+	svc.dbName = svc.conf.Data.NodeName
 	// svc.OpenDB(context.Background(), &pb.OpenDBRequest{DbName: svc.conf.Data.NodeName})
 	return svc
 }
 
+// use for simple node
 func (s *LsmdbService) OpenDB(ctx context.Context, req *pb.OpenDBRequest) (*pb.OpenDBReply, error) {
-	if err := s.uc.NewLevelDBCli(req.DbName); err != nil {
-		s.log.Errorf("open db %v fail because of %v", req.DbName, err)
+	if err := s.uc.NewLevelDBCli(s.conf.Data.NodeName); err != nil {
+		s.log.Errorf("Open db %v fail because of %v", req.DbName, err)
 		return &pb.OpenDBReply{Value: false}, nil
 	}
 	s.dbName = req.DbName
@@ -46,8 +53,7 @@ func (s *LsmdbService) Put(ctx context.Context, req *pb.PutRequest) (*pb.PutRepl
 	// 	// 中
 	// 	return &pb.PutReply{Data: true}, nil
 	// }
-
-	err := s.uc.Set(req.Key, req.Value)
+	err := s.uc.Set(fmt.Sprintf("%s_%s", s.dbName, req.Key), req.Value)
 	if err != nil {
 		s.log.Errorf("put key-value <%v> fail", req.Key)
 		return &pb.PutReply{Data: false}, err
@@ -82,9 +88,9 @@ func (s *LsmdbService) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetRepl
 	// 	value, err := s.ucS3.GetBytes(s.dbName, req.Key)
 	// 	return &pb.GetReply{Value: value}, err
 	// }
-	value, err := s.uc.Get(req.Key)
+	value, err := s.uc.Get(fmt.Sprintf("%s_%s", s.dbName, req.Key))
 	if err != nil {
-		s.log.Errorf("Get key %s fail", req.Key)
+		s.log.Errorf("Get key %s_%s fail", s.dbName, req.Key)
 		return &pb.GetReply{}, err
 	}
 	return &pb.GetReply{Value: value}, nil

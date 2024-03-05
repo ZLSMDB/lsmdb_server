@@ -23,11 +23,11 @@ data:
     temp_dir: "/db/"
     block_size: 32
     compaction_table_size: 32
-    iterator_sampling_rate: 32
+    iterator_sampling_rate: 4
     write_buffer: 32
   oss:
     endpoint: 127.0.0.1:9000
     access_key: minioadmin
     secret_key: minioadmin
     region: "cn-north-1"
-  node_name: node5
+  node_name: node7

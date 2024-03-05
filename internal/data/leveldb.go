@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/tsandl/skvdb/leveldb"
@@ -52,6 +53,42 @@ type Config struct {
 	LocationCacheDir string
 }
 
+func (l *leveldbRepo) CreateBucket(bucketName string) error {
+	s3Config := &aws.Config{
+		Credentials:      credentials.NewStaticCredentials(l.conf.Oss.AccessKey, l.conf.Oss.SecretKey, ""),
+		Endpoint:         aws.String(l.conf.Oss.Endpoint),
+		Region:           aws.String(l.conf.Oss.Region),
+		DisableSSL:       aws.Bool(true),
+		S3ForcePathStyle: aws.Bool(true),
+	}
+	newSession, err := session.NewSession(s3Config)
+	if err != nil {
+		l.log.Errorf("create session fail")
+	}
+	s3Client := awss3.New(newSession)
+	// 检查存储桶是否已存在
+	_, err = s3Client.HeadBucket(&s3.HeadBucketInput{
+		Bucket: aws.String(bucketName),
+	})
+
+	if err == nil {
+		// 存储桶已存在，返回已创建信息
+		l.log.Infof("Bucket '%s' already exists.\n", bucketName)
+		return nil
+	} else {
+		// 存储桶不存在，创建存储桶
+		_, err := s3Client.CreateBucket(&s3.CreateBucketInput{
+			Bucket: aws.String(bucketName),
+		})
+		if err != nil {
+			l.log.Error(err)
+			return nil
+		}
+		l.log.Infof("Bucket '%s' created successfully.\n", bucketName)
+	}
+	return nil
+}
+
 // 创建db
 func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 	var m sync.Mutex
@@ -72,34 +109,10 @@ func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 		Region:        l.conf.Oss.Region,
 		LocalCacheDir: l.conf.Leveldb.CacheDir,
 	}
-	// to judge bucket is exist
-	// s3Config := &aws.Config{
-	// 	Credentials:      credentials.NewStaticCredentials(l.conf.Oss.AccessKey, l.conf.Oss.SecretKey, ""),
-	// 	Endpoint:         aws.String(l.conf.Oss.Endpoint),
-	// 	Region:           aws.String(l.conf.Oss.Region),
-	// 	DisableSSL:       aws.Bool(true),
-	// 	S3ForcePathStyle: aws.Bool(true),
-	// }
-	// newSession, err := session.NewSession(s3Config)
-	// if err != nil {
-	// 	l.log.Errorf("create session fail")
-	// }
-	// s3Client := awss3.New(newSession)
-	// bucket := aws.String(bucketName)
-	// cparams := &awss3.CreateBucketInput{
-	// 	Bucket: bucket, // Required
-	// }
+	if err := l.CreateBucket(bucketName); err != nil {
+		return err
+	}
 
-	//Create a new bucket using the CreateBucket call.
-	// _, err = s3Client.CreateBucket(cparams)
-
-	// if err != nil {
-	// 	errMsg := err.Error()[0:23]
-	// 	if errMsg != "BucketAlreadyOwnedByYou" {
-	// 		l.log.Errorf("Bucket already existed, bucket name: %s", errMsg)
-	// 		// return err
-	// 	}
-	// }
 	storage, err := NewS3Storage(s3opt)
 	if err != nil {
 		l.log.Errorf("create s3 storage failed: because of %v", err)
@@ -207,31 +220,8 @@ func (l *leveldbRepo) OpenDB(bucketName string) (*leveldb.DB, error) {
 		LocalCacheDir: l.conf.Leveldb.CacheDir,
 	}
 	// to judge bucket is exist
-	s3Config := &aws.Config{
-		Credentials:      credentials.NewStaticCredentials(l.conf.Oss.AccessKey, l.conf.Oss.SecretKey, ""),
-		Endpoint:         aws.String(l.conf.Oss.Endpoint),
-		Region:           aws.String(l.conf.Oss.Region),
-		DisableSSL:       aws.Bool(true),
-		S3ForcePathStyle: aws.Bool(true),
-	}
-	newSession, err := session.NewSession(s3Config)
-	if err != nil {
-		l.log.Errorf("create session fail")
-	}
-	s3Client := awss3.New(newSession)
-	bucket := aws.String(bucketName)
-	cparams := &awss3.CreateBucketInput{
-		Bucket: bucket, // Required
-	}
-
-	_, err = s3Client.CreateBucket(cparams)
-
-	if err != nil {
-		errMsg := err.Error()[0:23]
-		if errMsg != "BucketAlreadyOwnedByYou" {
-			l.log.Errorf("Bucket already existed, bucket name: %s", errMsg)
-			return nil, err
-		}
+	if err := l.CreateBucket(bucketName); err != nil {
+		return nil, err
 	}
 	storage, err := NewS3Storage(s3opt)
 	if err != nil {
