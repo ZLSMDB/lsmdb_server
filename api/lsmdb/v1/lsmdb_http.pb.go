@@ -52,7 +52,7 @@ func RegisterLsmdbHTTPServer(s *http.Server, srv LsmdbHTTPServer) {
 	r.POST("/lsmdb/opendb", _Lsmdb_OpenDB0_HTTP_Handler(srv))
 	r.POST("/lsmdb/put", _Lsmdb_Put0_HTTP_Handler(srv))
 	r.POST("/lsmdb/putstr", _Lsmdb_PutStr0_HTTP_Handler(srv))
-	r.GET("/lsmdb/get/{key}", _Lsmdb_Get0_HTTP_Handler(srv))
+	r.GET("/lsmdb/get/{key:.*.*}", _Lsmdb_Get0_HTTP_Handler(srv))
 	r.POST("/lsmdb/close", _Lsmdb_CloseDB0_HTTP_Handler(srv))
 }
 
@@ -194,7 +194,7 @@ func (c *LsmdbHTTPClientImpl) CloseDB(ctx context.Context, in *CloseDBRequest, o
 
 func (c *LsmdbHTTPClientImpl) Get(ctx context.Context, in *GetRequest, opts ...http.CallOption) (*GetReply, error) {
 	var out GetReply
-	pattern := "/lsmdb/get/{key}"
+	pattern := "/lsmdb/get/{key:.*.*}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationLsmdbGet))
 	opts = append(opts, http.PathTemplate(pattern))

@@ -27,6 +27,7 @@ func NewHTTPServer(c *conf.Server, lsmdbs *service.LsmdbService, register *servi
 	if c.Http.Timeout != nil {
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
+
 	srv := http.NewServer(opts...)
 	lsmdbv1.RegisterLsmdbHTTPServer(srv, lsmdbs)
 	registerv1.RegisterRegisterHTTPServer(srv, register)

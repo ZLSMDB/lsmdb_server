@@ -25,7 +25,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /lsmdb/get/{key}:
+    /lsmdb/get/**:
         get:
             tags:
                 - Lsmdb
@@ -36,12 +36,6 @@ paths:
                 };
                 }
             operationId: Lsmdb_Get
-            parameters:
-                - name: key
-                  in: path
-                  required: true
-                  schema:
-                    type: string
             responses:
                 "200":
                     description: OK

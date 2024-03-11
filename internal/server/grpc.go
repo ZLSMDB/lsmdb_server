@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	MAX_MESSAGE_LENGTH = 256 * 1024 * 1024 // 可根据具体需求设置，此处设为256M
+	MAX_MESSAGE_LENGTH = 64 * 1024 * 1024 // 可根据具体需求设置，此处设为256M
 )
 
 // NewGRPCServer new a gRPC server.
@@ -40,7 +40,7 @@ func NewGRPCServer(c *conf.Server, lsmdbs *service.LsmdbService, register *servi
 	// 设置grpc大小
 	opts = append(opts, grpc.Options(g.MaxSendMsgSize(MAX_MESSAGE_LENGTH)))
 	opts = append(opts, grpc.Options(g.MaxSendMsgSize(MAX_MESSAGE_LENGTH)))
-	opts = append(opts, grpc.Options(g.MaxMsgSize(MAX_MESSAGE_LENGTH)))
+	opts = append(opts, grpc.Options(g.MaxRecvMsgSize(MAX_MESSAGE_LENGTH)))
 	// grpc.NewServer(grpc.StreamInterceptor(grpc.StreamInterceptor()),)
 	// opts = append(opts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(size)))
 	srv := grpc.NewServer(opts...)
