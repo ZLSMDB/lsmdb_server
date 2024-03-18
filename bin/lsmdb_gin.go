@@ -2,6 +2,20 @@ package v1
 
 // import (
 // 	context "context"
+// 	"fmt"
+// 	"net/http"
+
+// 	"github.com/ZLSMDB/lsmdb_server/internal/service"
+// 	"github.com/gin-gonic/gin"
+// 	kgin "github.com/go-kratos/gin"
+// 	"github.com/go-kratos/kratos/v2/errors"
+// 	"github.com/go-kratos/kratos/v2/middleware"
+// 	"github.com/go-kratos/kratos/v2/middleware/recovery"
+// 	"github.com/go-kratos/kratos/v2/transport"
+// )
+
+// import (
+// 	context "context"
 // 	"net/http"
 
 // 	"github.com/gin-contrib/cors"
@@ -15,7 +29,6 @@ package v1
 // 	r.GET("/lsmdb/opendb", _Lsmdb_Get0_HTTP_Handlers(srv))
 // 	go _Lsmdb_Get0_GIN_Handler(srv)
 // }
-
 
 // func _Lsmdb_Get0_HTTP_Handlers(srv LsmdbHTTPServer) func(ctx gin.Context) {
 // 	return func(ctx gin.Context) {
@@ -58,7 +71,6 @@ package v1
 // 	}
 
 // }
-
 
 // func _Lsmdb_Get0_GIN_Handler(srv LsmdbHTTPServer) {
 // 	router := gin.Default()
@@ -118,7 +130,7 @@ package v1
 // 	return func(ctx ht.Context) error {
 // 		ctx = gin.Context{Request: &ctx.Request,
 //         Writer:  w.ResponseWriter,}
-		
+
 // 		var in GetRequest
 // 		if err := ctx.BindQuery(&in); err != nil {
 // 			return err
@@ -140,8 +152,38 @@ package v1
 // 	}
 // }
 
+// func customMiddleware(handler middleware.Handler) middleware.Handler {
+// 	return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
+// 		if tr, ok := transport.FromServerContext(ctx); ok {
+// 			fmt.Println("operation:", tr.Operation())
+// 		}
+// 		reply, err = handler(ctx, req)
+// 		return
+// 	}
+// }
 
+// func GIN(lsmdbs *service.LsmdbService) *gin.Engine {
 
-func GetBytesValue() {
-	
-}
+// 	router := gin.Default()
+// 	// 使用kratos中间件
+// 	router.Use(kgin.Middlewares(recovery.Recovery(), customMiddleware))
+
+// 	router.GET("/getBytes/{*key}", func(ctx *gin.Context) {
+// 		key := ctx.Param("key")
+// 		fmt.Println(key)
+
+// 		if key == "error" {
+// 			// 返回kratos error
+// 			kgin.Error(ctx, errors.Unauthorized("auth_error", "no authentication"))
+// 		} else {
+// 			reply, err := lsmdbs.Get(ctx, &v1.GetRequest{Key: key})
+// 			if err != nil {
+// 				ctx.IndentedJSON(http.StatusNotFound, gin.H{key: "not found"})
+// 				return
+// 			}
+// 			ctx.Data(ctx.Writer.Status(), ctx.ContentType(), reply.Value)
+// 		}
+// 	})
+
+// 	return router
+// }
