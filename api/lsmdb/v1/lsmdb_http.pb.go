@@ -140,7 +140,7 @@ func _Lsmdb_Get0_HTTP_Handler(srv LsmdbHTTPServer) func(ctx http.Context) error 
 			return err
 		}
 		reply := out.(*GetReply)
-		return ctx.Result(200, reply)
+		return ctx.Result(200, reply.Value)
 	}
 }
 

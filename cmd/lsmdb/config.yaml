@@ -30,4 +30,4 @@ data:
     access_key: minioadmin
     secret_key: minioadmin
     region: "cn-north-1"
-  node_name: node8
+  node_name: node9

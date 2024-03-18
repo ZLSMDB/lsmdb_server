@@ -16,6 +16,7 @@ func NewHTTPServer(c *conf.Server, lsmdbs *service.LsmdbService, register *servi
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
+			MiddlewareCors(), //support cross-origin
 		),
 	}
 	if c.Http.Network != "" {
@@ -29,7 +30,12 @@ func NewHTTPServer(c *conf.Server, lsmdbs *service.LsmdbService, register *servi
 	}
 
 	srv := http.NewServer(opts...)
+
+	// 启用 Keep-Alive, long connect
+	// srv.SetKeepAlivesEnabled(true)
+
 	lsmdbv1.RegisterLsmdbHTTPServer(srv, lsmdbs)
 	registerv1.RegisterRegisterHTTPServer(srv, register)
+	srv.HandlePrefix("/", nil)
 	return srv
 }
