@@ -39,7 +39,8 @@ func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.
 	registerService := service.NewRegisterService(bootstrap, logger)
 	grpcServer := server.NewGRPCServer(confServer, lsmdbService, registerService, logger)
 	httpServer := server.NewHTTPServer(confServer, lsmdbService, registerService, logger)
-	app := newApp(logger, grpcServer, httpServer)
+	httpGinServer := server.NewHTTPGINServer(confServer, lsmdbService, registerService, logger)
+	app := newApp(logger, grpcServer, httpServer, httpGinServer)
 	return app, func() {
 		cleanup()
 	}, nil

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
+	"github.com/ZLSMDB/lsmdb_server/internal/server"
 	"github.com/tsandl/skvdb/leveldb"
 
 	"github.com/go-kratos/kratos/v2"
@@ -34,7 +35,7 @@ func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
 }
 
-func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
+func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server, hg server.HttpGinServer) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -44,6 +45,7 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 		kratos.Server(
 			gs,
 			hs,
+			(*http.Server)(hg),
 		),
 	)
 }

@@ -1,8 +1,6 @@
 package server
 
 import (
-	"fmt"
-
 	"github.com/ZLSMDB/lsmdb_server/api/app"
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/ZLSMDB/lsmdb_server/internal/service"
@@ -36,7 +34,6 @@ func NewHTTPGINServer(c *conf.Server, lsmdbs *service.LsmdbService, register *se
 
 	// 启用 Keep-Alive, long connect
 	// srv.SetKeepAlivesEnabled(true)
-	fmt.Println("httpgin.................................")
 	// lsmdbv1.RegisterLsmdbHTTPServer(srv, lsmdbs)
 	// registerv1.RegisterRegisterHTTPServer(srv, register)
 	srv.HandlePrefix("/", app.GIN(lsmdbs))
