@@ -72,7 +72,7 @@ func GIN(lsmdbs *service.LsmdbService) *gin.Engine {
 		close(resultChan)
 
 		if result == nil || len(result.Value) == 0 {
-			ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": "not found"})
+			ctx.IndentedJSON(http.StatusNotFound, gin.H{key: "not found"})
 			return
 		}
 

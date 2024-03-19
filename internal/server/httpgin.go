@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/ZLSMDB/lsmdb_server/api/app"
+	lsmdbv1 "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/ZLSMDB/lsmdb_server/internal/service"
 
@@ -36,6 +37,10 @@ func NewHTTPGINServer(c *conf.Server, lsmdbs *service.LsmdbService, register *se
 	// srv.SetKeepAlivesEnabled(true)
 	// lsmdbv1.RegisterLsmdbHTTPServer(srv, lsmdbs)
 	// registerv1.RegisterRegisterHTTPServer(srv, register)
+	r := srv.Route("/")
+	r.GET("/opendb/{dbname}", lsmdbv1.Lsmdb_OpenDBWeb0_HTTP_Handler(lsmdbs))
+	r.GET("/close", lsmdbv1.Lsmdb_CloseDBWeb0_HTTP_Handler(lsmdbs))
+	r.GET("/wget/{key:.*.*}", lsmdbv1.Lsmdb_Get0_HTTP_Handler(lsmdbs))
 	srv.HandlePrefix("/", app.GIN(lsmdbs))
 	return srv
 }
