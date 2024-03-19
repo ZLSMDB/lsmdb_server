@@ -100,3 +100,17 @@ func (s *LsmdbService) CloseDB(ctx context.Context, req *pb.CloseDBRequest) (*pb
 	err := s.uc.CloseDB()
 	return &pb.CloseDBReply{}, err
 }
+
+func (s *LsmdbService) OpenDBWeb(ctx context.Context, req *pb.OpenDBWebRequest) (*pb.OpenDBWebReply, error) {
+	if err := s.uc.NewLevelDBCli(s.conf.Data.NodeName); err != nil {
+		s.log.Errorf("Open db %v fail because of %v", req.Dbname, err)
+		return &pb.OpenDBWebReply{Value: false}, nil
+	}
+	s.dbName = req.Dbname
+	return &pb.OpenDBWebReply{Value: true}, nil
+}
+
+func (s *LsmdbService) CloseDBWeb(ctx context.Context, req *pb.CloseDBWebRequest) (*pb.CloseDBWebReply, error) {
+	err := s.uc.CloseDB()
+	return &pb.CloseDBWebReply{}, err
+}

@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	MAX_MESSAGE_LENGTH = 64 * 1024 * 1024 // 可根据具体需求设置，此处设为256M
+	MAX_MESSAGE_LENGTH = 64 * 1024 * 1024 // 可根据具体需求设置，此处设为64M
 )
 
 // NewGRPCServer new a gRPC server.

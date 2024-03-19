@@ -5,6 +5,9 @@ server:
   grpc:
     addr: 0.0.0.0:9004
     timeout: 1s
+  httpgin:
+    addr: 0.0.0.0:8005
+    timeout: 1s
 data:
   database:
     driver: mysql
@@ -27,7 +30,7 @@ data:
     write_buffer: 32
   oss:
     endpoint: 127.0.0.1:9000
-    access_key: minioadmin
-    secret_key: minioadmin
+    access_key: admin
+    secret_key: Ecbox2022!
     region: "cn-north-1"
-  node_name: node9
+  node_name: node1

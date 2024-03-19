@@ -11,8 +11,14 @@ service Lsmdb {
   // Sends a register
   rpc OpenDB (OpenDBRequest) returns (OpenDBReply) {
     option (google.api.http) = {
-      post: "/lsmdb/opendb"
+      post: "/opendb"
       body: "*"
+    };
+  }
+
+  rpc OpenDBWeb (OpenDBWebRequest) returns (OpenDBWebReply) {
+    option (google.api.http) = {
+      get: "/opendb/{dbname}"
     };
   }
   
@@ -26,14 +32,14 @@ service Lsmdb {
   */
   rpc Put (PutRequest) returns (PutReply) {
     option (google.api.http) = {
-      post: "/lsmdb/put"
+      post: "/put"
       body: "*"
     };
   }
 
   rpc PutStr (PutStrRequest) returns (PutStrReply) {
     option (google.api.http) = {
-      post: "/lsmdb/putstr"
+      post: "/putstr"
       body: "*"
     };
   }
@@ -47,15 +53,29 @@ service Lsmdb {
   */
   rpc Get (GetRequest) returns (GetReply) {
     option (google.api.http) = {
-      get: "/lsmdb/get/{key=**}" /*  */
+      get: "/get/{key=**}" /*  */
     };
   }
 
   rpc CloseDB(CloseDBRequest) returns (CloseDBReply) {
     option (google.api.http) = {
-      post: "/lsmdb/close"
+      post: "/close"
     };
   }
+
+  rpc CloseDBWeb(CloseDBWebRequest) returns (CloseDBWebReply) {
+    option (google.api.http) = {
+      get: "/close"
+    };
+  }
+}
+
+message OpenDBWebRequest {
+  string dbname = 1;
+}
+
+message OpenDBWebReply {
+  bool value = 1;
 }
 
 // 命名必须使用下划线，否则出现传递不了参数的情况
@@ -99,3 +119,8 @@ message GetReply {
 message CloseDBRequest {}
 
 message CloseDBReply {}
+
+message CloseDBWebRequest {
+}
+
+message CloseDBWebReply {}

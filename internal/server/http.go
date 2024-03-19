@@ -1,7 +1,6 @@
 package server
 
 import (
-	"github.com/ZLSMDB/lsmdb_server/api/app"
 	lsmdbv1 "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
 	registerv1 "github.com/ZLSMDB/lsmdb_server/api/register/v1"
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
@@ -37,7 +36,7 @@ func NewHTTPServer(c *conf.Server, lsmdbs *service.LsmdbService, register *servi
 
 	lsmdbv1.RegisterLsmdbHTTPServer(srv, lsmdbs)
 	registerv1.RegisterRegisterHTTPServer(srv, register)
-	srv.HandlePrefix("/", app.GIN(lsmdbs))
+	// srv.HandlePrefix("/", app.GIN(lsmdbs))
 	// srv.HandlePrefix("/", app.GINMore(lsmdbs))
 	return srv
 }

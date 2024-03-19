@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 
@@ -29,7 +28,7 @@ func customMiddleware(handler middleware.Handler) middleware.Handler {
 
 func GIN(lsmdbs *service.LsmdbService) *gin.Engine {
 	// 禁止请求日志打印
-	gin.DefaultWriter = io.Discard
+	// gin.DefaultWriter = io.Discard
 
 	router := gin.Default()
 	// 添加跨域中间件

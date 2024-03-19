@@ -26,7 +26,7 @@ data:
     write_buffer: 32
   oss:
     endpoint: 127.0.0.1:9000
-    access_key: 27KULDvjHJ007EelkpbF
-    secret_key: ss0n04PLi2EZk25E3HP16odwuF1ums4VNT1R7IWB
+    access_key: admin
+    secret_key: Ecbox2022!
     region: "cn-north-1"
-  node_name: node2
+  node_name: node1
