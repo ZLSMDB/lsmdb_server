@@ -42,7 +42,7 @@ func GIN(lsmdbs *service.LsmdbService) *gin.Engine {
 	router.Use(kgin.Middlewares(recovery.Recovery(), customMiddleware))
 
 	// 控制并发数的信号量
-	sem := semaphore.NewWeighted(100) // 限制为100个并发
+	sem := semaphore.NewWeighted(256) // 限制为100个并发
 
 	router.GET("/gets/*key", func(ctx *gin.Context) {
 		key := ctx.Param("key")

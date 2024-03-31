@@ -27,10 +27,12 @@ data:
     block_size: 32
     compaction_table_size: 32
     iterator_sampling_rate: 4
-    write_buffer: 32
+    write_buffer: 128
+    block_cache_capacity: 128
+    s3_lru_cache: 1024
   oss:
     endpoint: 127.0.0.1:9000
     access_key: minioadmin
     secret_key: minioadmin
     region: "cn-north-1"
-  node_name: node9
+  node_name: node12

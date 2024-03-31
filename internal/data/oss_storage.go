@@ -16,8 +16,6 @@ import (
 	"github.com/tsandl/skvdb/leveldb/storage"
 )
 
-var errFileOpen = errors.New("leveldb/storage: file still open")
-
 const CacheSize = 500
 
 type OpenOption struct {
@@ -53,7 +51,7 @@ type S3Storage struct {
 }
 
 // NewS3Storage returns a new s3-backed storage implementation.
-func NewS3Storage(opt OpenOption) (storage.Storage, error) {
+func NewS3Storage(opt OpenOption, cacheSize int) (storage.Storage, error) {
 	rand.Seed(int64(time.Now().Nanosecond()))
 	s3Client, err := GetS3Client(opt)
 	if err != nil {
@@ -64,7 +62,8 @@ func NewS3Storage(opt OpenOption) (storage.Storage, error) {
 	} else {
 		return nil, errors.New("need a local cache dir for s3 storage")
 	}
-	ramFileCache, _ := lru.New(CacheSize)
+	// ramFileCache, _ := lru.New(CacheSize)
+	ramFileCache, _ := lru.New(cacheSize)
 	ms := &S3Storage{
 		objStore: s3Client,
 		ramFiles: ramFileCache,

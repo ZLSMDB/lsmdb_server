@@ -64,7 +64,8 @@ func Lsmdb_Get0_HTTP_Handler(srv LsmdbHTTPServer) func(ctx http.Context) error {
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetReply)
-		return ctx.Blob(200, "application/octet-stream", reply.Value)
+		// reply := out.(*GetReply)
+		// return ctx.Blob(200, "application/octet-stream", reply.Value)
+		return ctx.Blob(200, "application/octet-stream", out.(*GetReply).Value)
 	}
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/tsandl/skvdb/leveldb"
@@ -67,7 +66,7 @@ func (l *leveldbRepo) CreateBucket(bucketName string) error {
 	}
 	s3Client := awss3.New(newSession)
 	// 检查存储桶是否已存在
-	_, err = s3Client.HeadBucket(&s3.HeadBucketInput{
+	_, err = s3Client.HeadBucket(&awss3.HeadBucketInput{
 		Bucket: aws.String(bucketName),
 	})
 
@@ -77,7 +76,7 @@ func (l *leveldbRepo) CreateBucket(bucketName string) error {
 		return nil
 	} else {
 		// 存储桶不存在，创建存储桶
-		_, err := s3Client.CreateBucket(&s3.CreateBucketInput{
+		_, err := s3Client.CreateBucket(&awss3.CreateBucketInput{
 			Bucket: aws.String(bucketName),
 		})
 		if err != nil {
@@ -97,7 +96,7 @@ func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 	opt.IteratorSamplingRate = int(l.conf.Leveldb.IteratorSamplingRate * MiB)
 	opt.WriteBuffer = int(l.conf.Leveldb.WriteBuffer * MiB)
 	opt.BlockSize = int(l.conf.Leveldb.BlockSize * MiB)
-	opt.BlockCacheCapacity = int(l.conf.Leveldb.BlockSize * MiB)
+	opt.BlockCacheCapacity = int(l.conf.Leveldb.BlockCacheCapacity * MiB)
 
 	localPath := l.conf.Leveldb.DataDir + bucketName
 	s3opt := OpenOption{
@@ -113,7 +112,12 @@ func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 		return err
 	}
 
-	storage, err := NewS3Storage(s3opt)
+	s3LruCache := 512
+	if l.conf.Leveldb.S3LruCache != 0 {
+		s3LruCache = int(l.conf.Leveldb.S3LruCache * MiB)
+	}
+
+	storage, err := NewS3Storage(s3opt, s3LruCache)
 	if err != nil {
 		l.log.Errorf("create s3 storage failed: because of %v", err)
 		return err
@@ -207,7 +211,8 @@ func (l *leveldbRepo) OpenDB(bucketName string) (*leveldb.DB, error) {
 	opt.CompactionTableSize = int(l.conf.Leveldb.CompactionTableTize * MiB)
 	opt.IteratorSamplingRate = int(l.conf.Leveldb.IteratorSamplingRate * MiB)
 	opt.WriteBuffer = int(l.conf.Leveldb.WriteBuffer * MiB)
-	// opt.BlockSize = int(l.conf.Leveldb.BlockSize)
+	opt.BlockSize = int(l.conf.Leveldb.BlockSize * MiB)
+	opt.BlockCacheCapacity = int(l.conf.Leveldb.BlockCacheCapacity * MiB)
 
 	localPath := l.conf.Leveldb.DataDir + bucketName
 	s3opt := OpenOption{
@@ -223,7 +228,11 @@ func (l *leveldbRepo) OpenDB(bucketName string) (*leveldb.DB, error) {
 	if err := l.CreateBucket(bucketName); err != nil {
 		return nil, err
 	}
-	storage, err := NewS3Storage(s3opt)
+	s3LruCache := 512
+	if l.conf.Leveldb.S3LruCache != 0 {
+		s3LruCache = int(l.conf.Leveldb.S3LruCache * MiB)
+	}
+	storage, err := NewS3Storage(s3opt, s3LruCache)
 	if err != nil {
 		l.log.Errorf("create s3 storage failed: %v", err)
 		return nil, err

@@ -63,6 +63,8 @@ message Leveldb {
   uint64 iterator_sampling_rate= 4;
   uint64 write_buffer = 5;
   uint64 compaction_table_tize = 6;
+  uint64 block_cache_capacity = 7;
+  uint64 s3_lru_cache = 8;
 }
 
   Database database = 1;
