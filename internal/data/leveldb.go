@@ -90,13 +90,16 @@ func (l *leveldbRepo) CreateBucket(bucketName string) error {
 
 // 创建db
 func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
-	var m sync.Mutex
+	// var m sync.Mutex
 	opt := new(opt.Options)
 	opt.CompactionTableSize = int(l.conf.Leveldb.CompactionTableTize * MiB)
 	opt.IteratorSamplingRate = int(l.conf.Leveldb.IteratorSamplingRate * MiB)
 	opt.WriteBuffer = int(l.conf.Leveldb.WriteBuffer * MiB)
 	opt.BlockSize = int(l.conf.Leveldb.BlockSize * MiB)
 	opt.BlockCacheCapacity = int(l.conf.Leveldb.BlockCacheCapacity * MiB)
+	opt.Compression = 1
+	// opt.WriteL0SlowdownTrigger = int(l.conf.Leveldb.WriteBuffer * MiB)
+	// opt.WriteL0PauseTrigger = int(l.conf.Leveldb.WriteBuffer * MiB)
 
 	localPath := l.conf.Leveldb.DataDir + bucketName
 	s3opt := OpenOption{
@@ -112,7 +115,7 @@ func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 		return err
 	}
 
-	s3LruCache := 512
+	s3LruCache := 512 * MiB
 	if l.conf.Leveldb.S3LruCache != 0 {
 		s3LruCache = int(l.conf.Leveldb.S3LruCache * MiB)
 	}
@@ -123,9 +126,9 @@ func (l *leveldbRepo) NewLevelDBCli(bucketName string) error {
 		return err
 	}
 	// add lock
-	m.Lock()
+	// m.Lock()
 	dbInstance, err := leveldb.Open(storage, opt)
-	m.Unlock()
+	// m.Unlock()
 	if err != nil {
 		l.log.Errorf("create db %s failed: %v", bucketName, err)
 		return err
@@ -213,7 +216,6 @@ func (l *leveldbRepo) OpenDB(bucketName string) (*leveldb.DB, error) {
 	opt.WriteBuffer = int(l.conf.Leveldb.WriteBuffer * MiB)
 	opt.BlockSize = int(l.conf.Leveldb.BlockSize * MiB)
 	opt.BlockCacheCapacity = int(l.conf.Leveldb.BlockCacheCapacity * MiB)
-
 	localPath := l.conf.Leveldb.DataDir + bucketName
 	s3opt := OpenOption{
 		Bucket:        bucketName,
@@ -228,7 +230,7 @@ func (l *leveldbRepo) OpenDB(bucketName string) (*leveldb.DB, error) {
 	if err := l.CreateBucket(bucketName); err != nil {
 		return nil, err
 	}
-	s3LruCache := 512
+	s3LruCache := 512 * MiB
 	if l.conf.Leveldb.S3LruCache != 0 {
 		s3LruCache = int(l.conf.Leveldb.S3LruCache * MiB)
 	}

@@ -54,6 +54,8 @@ func (s *LsmdbService) Put(ctx context.Context, req *pb.PutRequest) (*pb.PutRepl
 	// 	return &pb.PutReply{Data: true}, nil
 	// }
 	err := s.uc.Set(fmt.Sprintf("%s_%s", s.dbName, req.Key), req.Value)
+
+	fmt.Println(fmt.Sprintf("%s_%s", s.dbName, req.Key))
 	if err != nil {
 		s.log.Errorf("put key-value <%v> fail", req.Key)
 		return &pb.PutReply{Data: false}, err
