@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/ZLSMDB/lsmdb_server/internal/biz"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/go-kratos/kratos/v2/log"
@@ -15,8 +14,13 @@ type ossRepo struct {
 	log  *log.Helper
 }
 
+type OssRepo interface {
+	PutBytes(bucket string, key string, data []byte) error
+	GetBytes(bucket string, key string) ([]byte, error)
+}
+
 // NewLevelRepo .
-func NewOssRepo(data *Data, logger log.Logger) biz.OssRepo {
+func NewOssRepo(data *Data, logger log.Logger) OssRepo {
 	return &ossRepo{
 		data: data,
 		log:  log.NewHelper(logger),

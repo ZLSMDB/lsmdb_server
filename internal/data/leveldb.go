@@ -3,7 +3,6 @@ package data
 import (
 	"sync"
 
-	"github.com/ZLSMDB/lsmdb_server/internal/biz"
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -23,7 +22,7 @@ type leveldbRepo struct {
 }
 
 // NewLevelRepo .
-func NewLevelDBRepo(conf *conf.Data, leveldb *leveldb.DB, logger log.Logger) biz.LevelDBRepo {
+func NewLevelDBRepo(conf *conf.Data, leveldb *leveldb.DB, logger log.Logger) DBRepo {
 	return &leveldbRepo{
 		conf:    conf,
 		leveldb: leveldb,

@@ -1,30 +1,32 @@
 package biz
 
 import (
+	"github.com/ZLSMDB/lsmdb_server/internal/data"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/tsandl/skvdb/leveldb"
 )
 
-type LevelDBRepo interface {
-	NewLevelDBCli(bucketName string) error
-	Set(key string, value []byte) error
-	Get(key string) ([]byte, error)
-	Del(key string) error
-	State(value string) (string, error)
-	Iterator(prefix string) (map[string]string, error)
-	IteratorOnlyKey(prefix string) ([]string, error)
-	OpenDB(bucketName string) (*leveldb.DB, error)
-	CloseDB() error
-}
+// type DBRepo interface {
+// 	NewLevelDBCli(bucketName string) error
+// 	Set(key string, value []byte) error
+// 	Get(key string) ([]byte, error)
+// 	Del(key string) error
+// 	State(value string) (string, error)
+// 	Iterator(prefix string) (map[string]string, error)
+// 	IteratorOnlyKey(prefix string) ([]string, error)
+// 	OpenDB(bucketName string) (*leveldb.DB, error)
+// 	CloseDB() error
+// }
 
 // LevelDBUsecase is a leveldb usecase.
 type LevelDBUsecase struct {
-	repo LevelDBRepo
+	repo data.DBRepo
 	log  *log.Helper
 }
 
 // NewLevelDBUsecase new a leveldb usecase.
-func NewLevelDBUsecase(repo LevelDBRepo, logger log.Logger) *LevelDBUsecase {
+func NewLevelDBUsecase(repo data.DBRepo, logger log.Logger) *LevelDBUsecase {
+	// TODO
 	return &LevelDBUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 

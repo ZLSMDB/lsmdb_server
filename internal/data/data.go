@@ -1,6 +1,8 @@
 package data
 
 import (
+	"errors"
+
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -9,27 +11,45 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
+	"github.com/tecbot/gorocksdb"
 	"github.com/tsandl/skvdb/leveldb"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewLevelDBRepo, NewS3Cli, NewOssRepo, NewRedisCli)
+var ProviderSet = wire.NewSet(NewData, NewLevelDBRepo, NewRocksdbRepo, NewS3Cli, NewOssRepo, NewRedisCli)
 
 // Data .
 type Data struct {
 	// TODO wrapped database client
-	leveldb *leveldb.DB
-	osscli  *s3.S3
-	rdb     *redis.Client
+	db     DBRepo
+	osscli *s3.S3
+	rdb    *redis.Client
 }
 
 // NewData .
-func NewData(leveldb *leveldb.DB, s3 *s3.S3, rdb *redis.Client, logger log.Logger) (*Data, func(), error) {
+func NewData(leveldb *leveldb.DB, rocksdb *gorocksdb.DB, s3 *s3.S3, rdb *redis.Client, logger log.Logger) (*Data, func(), error) {
+
+	var dbType DBType
+	switch "rocksdb" {
+	case "leveldb":
+		dbType = LevelDBs
+	case "rocksdb":
+		dbType = RocksDB
+	default:
+		return nil, nil, errors.New("unsupported database type")
+	}
+
+	// Create a new instance of the database repository based on the database type
+	dbRepo, err := NewRepo(dbType)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	cleanup := func() {
 		log.NewHelper(logger).Info("closing the data resources")
 
 	}
-	return &Data{leveldb: leveldb, osscli: s3, rdb: rdb}, cleanup, nil
+	return &Data{db: dbRepo, osscli: s3, rdb: rdb}, cleanup, nil
 }
 
 func NewS3Cli(c *conf.Data) *s3.S3 {

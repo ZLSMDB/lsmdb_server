@@ -72,4 +72,5 @@ require (
 	github.com/go-kratos/gin v0.1.0
 	github.com/go-kratos/kratos/v2 v2.7.2
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c
 )
