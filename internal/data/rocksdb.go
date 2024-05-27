@@ -9,20 +9,18 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/go-kratos/kratos/v2/log"
-	rocksdb "github.com/tecbot/gorocksdb"
+	"github.com/tecbot/gorocksdb"
 	"github.com/tsandl/skvdb/leveldb"
 )
 
 type rocksdbRepo struct {
-	rocksdb *rocksdb.DB
+	rocksdb *gorocksdb.DB
 	conf    *conf.Data
 	log     *log.Helper
-
-	db     *rocksdb.DB
-	opts   *rocksdb.Options
-	ro     *rocksdb.ReadOptions
-	wo     *rocksdb.WriteOptions
-	dbPath string // in conf
+	opts    *gorocksdb.Options
+	ro      *gorocksdb.ReadOptions
+	wo      *gorocksdb.WriteOptions
+	dbPath  string // in conf
 }
 
 func (l *rocksdbRepo) CreateBucket(bucketName string) error {
@@ -62,7 +60,7 @@ func (l *rocksdbRepo) CreateBucket(bucketName string) error {
 }
 
 // NewLevelRepo .
-func NewRocksdbRepo(conf *conf.Data, rocksdb *rocksdb.DB, logger log.Logger) DBRepo {
+func NewRocksdbRepo(conf *conf.Data, rocksdb *gorocksdb.DB, logger log.Logger) DBRepo {
 	return &rocksdbRepo{
 		conf:    conf,
 		rocksdb: rocksdb,
@@ -74,12 +72,12 @@ func (repo *rocksdbRepo) NewLevelDBCli(bucketName string) error {
 	if err := repo.CreateBucket(bucketName); err != nil {
 		return err
 	}
-	repo.opts = rocksdb.NewDefaultOptions()
+	repo.opts = gorocksdb.NewDefaultOptions()
 	repo.opts.SetCreateIfMissing(true)
-	repo.ro = rocksdb.NewDefaultReadOptions()
-	repo.wo = rocksdb.NewDefaultWriteOptions()
+	repo.ro = gorocksdb.NewDefaultReadOptions()
+	repo.wo = gorocksdb.NewDefaultWriteOptions()
 	var err error
-	repo.rocksdb, err = rocksdb.OpenDb(repo.opts, bucketName)
+	repo.rocksdb, err = gorocksdb.OpenDb(repo.opts, bucketName)
 	return err
 
 }

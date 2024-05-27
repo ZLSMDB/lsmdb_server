@@ -14,6 +14,7 @@ import (
 	"github.com/ZLSMDB/lsmdb_server/internal/service"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/tecbot/gorocksdb"
 	"github.com/tsandl/skvdb/leveldb"
 )
 
@@ -24,12 +25,15 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.Data, logger log.Logger, db *leveldb.DB) (*kratos.App, func(), error) {
-	levelDBRepo := data.NewLevelDBRepo(confData, db, logger)
-	levelDBUsecase := biz.NewLevelDBUsecase(levelDBRepo, logger)
+func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.Data, logger log.Logger, db *leveldb.DB, gorocksdbDB *gorocksdb.DB) (*kratos.App, func(), error) {
+	dbRepo, err := data.NewRepo(confData, db, gorocksdbDB, logger)
+	if err != nil {
+		return nil, nil, err
+	}
+	levelDBUsecase := biz.NewLevelDBUsecase(dbRepo, logger)
 	s3 := data.NewS3Cli(confData)
 	client := data.NewRedisCli(confData)
-	dataData, cleanup, err := data.NewData(db, s3, client, logger)
+	dataData, cleanup, err := data.NewData(db, gorocksdbDB, s3, client, logger)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -3,6 +3,9 @@ package data
 import (
 	"errors"
 
+	"github.com/ZLSMDB/lsmdb_server/internal/conf"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/tecbot/gorocksdb"
 	"github.com/tsandl/skvdb/leveldb"
 )
 
@@ -21,20 +24,16 @@ type DBRepo interface {
 }
 
 const (
-	LevelDBs DBType = iota
-	RocksDB
+	LevelDBs = "leveldb"
+	RocksDB  = "rocksdb"
 )
 
-type RepoFactory struct {
-	dbType DBType
-}
-
-func NewRepo(dbType DBType) (DBRepo, error) {
-	switch dbType {
+func NewRepo(conf *conf.Data, leveldb *leveldb.DB, rocksdb *gorocksdb.DB, logger log.Logger) (DBRepo, error) {
+	switch conf.Dbtype {
 	case LevelDBs:
-		return &leveldbRepo{}, nil
+		return NewLevelDBRepo(conf, leveldb, logger), nil
 	case RocksDB:
-		return &rocksdbRepo{}, nil
+		return NewRocksdbRepo(conf, rocksdb, logger), nil
 	default:
 		return nil, errors.New("unsupported database type")
 	}

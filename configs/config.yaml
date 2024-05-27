@@ -6,6 +6,7 @@ server:
     addr: 0.0.0.0:8005
     timeout: 1s
 data:
+  dbtype: rocksdb
   database:
     driver: mysql
     source: root:root@tcp(127.0.0.1:3306)/test

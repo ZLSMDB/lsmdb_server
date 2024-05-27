@@ -6,6 +6,7 @@ import (
 
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/ZLSMDB/lsmdb_server/internal/server"
+	"github.com/tecbot/gorocksdb"
 	"github.com/tsandl/skvdb/leveldb"
 
 	"github.com/go-kratos/kratos/v2"
@@ -77,7 +78,8 @@ func main() {
 		panic(err)
 	}
 	var ldb *leveldb.DB
-	app, cleanup, err := wireApp(&bc, bc.Server, bc.Data, logger, ldb)
+	var rocksdb *gorocksdb.DB
+	app, cleanup, err := wireApp(&bc, bc.Server, bc.Data, logger, ldb, rocksdb)
 	if err != nil {
 		panic(err)
 	}
