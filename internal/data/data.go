@@ -9,8 +9,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
-	"github.com/tecbot/gorocksdb"
-	"github.com/tsandl/skvdb/leveldb"
 )
 
 // ProviderSet is data providers.
@@ -24,7 +22,7 @@ type Data struct {
 }
 
 // NewData .
-func NewData(leveldb *leveldb.DB, rocksdb *gorocksdb.DB, s3 *s3.S3, rdb *redis.Client, logger log.Logger) (*Data, func(), error) {
+func NewData(s3 *s3.S3, rdb *redis.Client, logger log.Logger) (*Data, func(), error) {
 
 	cleanup := func() {
 		log.NewHelper(logger).Info("closing the data resources")

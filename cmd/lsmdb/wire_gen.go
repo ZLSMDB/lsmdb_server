@@ -33,7 +33,7 @@ func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.
 	levelDBUsecase := biz.NewLevelDBUsecase(dbRepo, logger)
 	s3 := data.NewS3Cli(confData)
 	client := data.NewRedisCli(confData)
-	dataData, cleanup, err := data.NewData(db, gorocksdbDB, s3, client, logger)
+	dataData, cleanup, err := data.NewData(s3, client, logger)
 	if err != nil {
 		return nil, nil, err
 	}
