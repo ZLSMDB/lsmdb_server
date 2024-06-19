@@ -140,9 +140,9 @@ func (repo *rocksdbRepo) OpenDB(bucketName string) (*leveldb.DB, error) {
 }
 
 func (repo *rocksdbRepo) CloseDB() error {
-	repo.rocksdb.Close()
-	repo.opts.Destroy()
 	repo.ro.Destroy()
 	repo.wo.Destroy()
+	repo.opts.Destroy()
+	repo.rocksdb.Close()
 	return nil
 }
