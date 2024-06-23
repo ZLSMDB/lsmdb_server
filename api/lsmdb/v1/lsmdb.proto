@@ -4,10 +4,10 @@ package lsmdb.v1;
 
 import "google/api/annotations.proto";
 
-// option go_package = "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1;v1";
+option go_package = "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1;v1";
 // option java_multiple_files = true;
-option java_package = "com.example.lsmdb";
-option java_outer_classname = "LsmdbProto";
+// option java_package = "com.example.lsmdb";
+// option java_outer_classname = "LsmdbProto";
 
 // The Lsmdb service definition.
 service Lsmdb {
@@ -71,7 +71,54 @@ service Lsmdb {
       get: "/close"
     };
   }
+
+  rpc TransferKV(TransferKVRequest) returns (TransferKVReply) {
+    option (google.api.http) = {
+      post: "/transferkv"
+    };
+  }
+
+  rpc Transfer(TransferRequest) returns (TransferReply) {
+    option (google.api.http) = {
+      post: "/Transfer"
+    };  
+  }
+
+  rpc GetKVs(GetKVsRequest) returns (GetKVsReply) {
+    option (google.api.http) = {
+      post: "/GetKVs"
+    };
+  }
 }
+
+message GetKVsRequest {
+  repeated string keys = 1;
+}
+
+message GetKVsReply {
+  repeated bytes values = 1;
+}
+
+message TransferKVRequest {
+  string regionName = 1;
+  repeated string keys = 2;
+  string nodeAddress = 3;
+}
+
+message TransferKVReply {
+  bool success = 1;
+}
+
+message TransferRequest {
+  string regionName = 1;
+  repeated string keys = 2;
+  string nodeAddress = 3;
+}
+
+message TransferReply {
+  bool success = 1;
+}
+
 
 message OpenDBWebRequest {
   string dbname = 1;

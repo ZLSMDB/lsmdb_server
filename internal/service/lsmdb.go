@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	pb "github.com/ZLSMDB/lsmdb_server/api/lsmdb/v1"
 	"github.com/ZLSMDB/lsmdb_server/internal/biz"
@@ -115,4 +116,49 @@ func (s *LsmdbService) OpenDBWeb(ctx context.Context, req *pb.OpenDBWebRequest) 
 func (s *LsmdbService) CloseDBWeb(ctx context.Context, req *pb.CloseDBWebRequest) (*pb.CloseDBWebReply, error) {
 	err := s.uc.CloseDB()
 	return &pb.CloseDBWebReply{}, err
+}
+
+func (s *LsmdbService) Transfer(ctx context.Context, req *pb.TransferRequest) (*pb.TransferReply, error) {
+	reply, err := s.TransferKV(ctx, (*pb.TransferKVRequest)(req))
+	return (*pb.TransferReply)(reply), err
+}
+
+func (s *LsmdbService) TransferKV(ctx context.Context, req *pb.TransferKVRequest) (*pb.TransferKVReply, error) {
+	cli, conn := ConnectDB(req.NodeAddress) // TODO 优化连接速度
+	conn.Connect()
+	defer conn.Close()
+	cli.OpenDB(ctx, &pb.OpenDBRequest{DbName: strings.Split(req.RegionName, "_")[0]}) // dbname
+	values, err := s.getKVs(cli, req.Keys)
+	if err != nil {
+		return &pb.TransferKVReply{Success: false}, err
+	}
+	for i, value := range values {
+		_, err := cli.Put(ctx, &pb.PutRequest{Key: req.Keys[i], Value: value})
+		if err != nil {
+			return &pb.TransferKVReply{Success: false}, err
+		}
+	}
+
+	return &pb.TransferKVReply{Success: true}, nil
+}
+
+func (s *LsmdbService) getKVs(cli pb.LsmdbClient, keys []string) ([][]byte, error) {
+	reply, err := cli.GetKVs(context.Background(), &pb.GetKVsRequest{Keys: keys})
+	if err != nil {
+		return nil, err
+	}
+	return reply.Values, nil
+}
+
+func (s *LsmdbService) GetKVs(ctx context.Context, req *pb.GetKVsRequest) (*pb.GetKVsReply, error) {
+	var values [][]byte
+	var err error
+	for _, key := range req.Keys {
+		reply, err := s.uc.Get(key)
+		if err != nil {
+			continue
+		}
+		values = append(values, reply)
+	}
+	return &pb.GetKVsReply{Values: values}, err
 }

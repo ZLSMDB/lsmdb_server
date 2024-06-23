@@ -3,8 +3,362 @@
 
 openapi: 3.0.3
 info:
-    title: ""
+    title: Lsmdb API
+    description: The Lsmdb service definition.
     version: 0.0.1
-paths: {}
+paths:
+    /GetKVs:
+        post:
+            tags:
+                - Lsmdb
+            operationId: Lsmdb_GetKVs
+            parameters:
+                - name: keys
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetKVsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /Transfer:
+        post:
+            tags:
+                - Lsmdb
+            operationId: Lsmdb_Transfer
+            parameters:
+                - name: regionName
+                  in: query
+                  schema:
+                    type: string
+                - name: keys
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                - name: nodeAddress
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TransferReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /close:
+        get:
+            tags:
+                - Lsmdb
+            operationId: Lsmdb_CloseDBWeb
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CloseDBWebReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - Lsmdb
+            operationId: Lsmdb_CloseDB
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CloseDBReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /get/**:
+        get:
+            tags:
+                - Lsmdb
+            description: |-
+                rpc Get (GetRequest) returns (stream GetReply) {
+                option (google.api.http) = {
+                get: "/lsmdb/get/{key}"
+                };
+                }
+            operationId: Lsmdb_Get
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /opendb:
+        post:
+            tags:
+                - Lsmdb
+            description: Sends a register
+            operationId: Lsmdb_OpenDB
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/OpenDBRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OpenDBReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /opendb/{dbname}:
+        get:
+            tags:
+                - Lsmdb
+            operationId: Lsmdb_OpenDBWeb
+            parameters:
+                - name: dbname
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/OpenDBWebReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /put:
+        post:
+            tags:
+                - Lsmdb
+            description: |-
+                rpc Put (stream PutRequest) returns (PutReply) {
+                option (google.api.http) = {
+                post: "/lsmdb/put"
+                body: "*"
+                };
+                }
+            operationId: Lsmdb_Put
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PutReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /putstr:
+        post:
+            tags:
+                - Lsmdb
+            operationId: Lsmdb_PutStr
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PutStrRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PutStrReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /transferkv:
+        post:
+            tags:
+                - Lsmdb
+            operationId: Lsmdb_TransferKV
+            parameters:
+                - name: regionName
+                  in: query
+                  schema:
+                    type: string
+                - name: keys
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+                - name: nodeAddress
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TransferKVReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
-    schemas: {}
+    schemas:
+        CloseDBReply:
+            type: object
+            properties: {}
+        CloseDBWebReply:
+            type: object
+            properties: {}
+        GetKVsReply:
+            type: object
+            properties:
+                values:
+                    type: array
+                    items:
+                        type: string
+                        format: bytes
+        GetReply:
+            type: object
+            properties:
+                value:
+                    type: string
+                    format: bytes
+            description: The response message containing the value about register success or not .
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        OpenDBReply:
+            type: object
+            properties:
+                value:
+                    type: boolean
+            description: The response message containing the value about register success or not .
+        OpenDBRequest:
+            type: object
+            properties:
+                dbName:
+                    type: string
+            description: 命名必须使用下划线，否则出现传递不了参数的情况
+        OpenDBWebReply:
+            type: object
+            properties:
+                value:
+                    type: boolean
+        PutReply:
+            type: object
+            properties:
+                data:
+                    type: boolean
+        PutRequest:
+            type: object
+            properties:
+                key:
+                    type: string
+                value:
+                    type: string
+                    format: bytes
+        PutStrReply:
+            type: object
+            properties:
+                data:
+                    type: boolean
+        PutStrRequest:
+            type: object
+            properties:
+                key:
+                    type: string
+                value:
+                    type: string
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        TransferKVReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        TransferReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+tags:
+    - name: Lsmdb
