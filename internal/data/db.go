@@ -5,7 +5,7 @@ import (
 
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/tecbot/gorocksdb"
+	gorocksdb "github.com/linxGnu/grocksdb"
 	"github.com/tsandl/skvdb/leveldb"
 )
 

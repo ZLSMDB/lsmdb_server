@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/tecbot/gorocksdb"
+	gorocksdb "github.com/linxGnu/grocksdb"
 	"github.com/tsandl/skvdb/leveldb"
 )
 

@@ -1,12 +1,15 @@
 server:
   http:
-    addr: 0.0.0.0:8004
+    addr: 0.0.0.0:8014
     timeout: 1s
   grpc:
-    addr: 0.0.0.0:8005
+    addr: 0.0.0.0:9014
+    timeout: 1s
+  httpgin:
+    addr: 0.0.0.0:8015
     timeout: 1s
 data:
-  dbtype: rocksdb
+  dbtype: leveldb
   database:
     driver: mysql
     source: root:root@tcp(127.0.0.1:3306)/test
@@ -17,17 +20,20 @@ data:
   etcd:
     username: root
     password: password
-    cluster_addrs: ["127.0.0.1:2479", "127.0.0.1:2579", "127.0.0.1:2679"]
+    #cluster_addrs: ["10.176.34.134:2379", "10.176.34.135:2379", "10.176.34.140:2379"]
+    cluster_addrs: ["127.0.0.1:2379"]
   leveldb:
-    cache_dir: "/home/tsand/go_code/db/"
-    data_dir: "/"
-    block_size: 32
-    compaction_table_size: 32
+    cache_dir: "/data/lsmdb/tmps/"
+    temp_dir: "/dbs/"
+    block_size: 256
+    compaction_table_size: 256
     iterator_sampling_rate: 4
-    write_buffer: 32
+    write_buffer: 256
+    block_cache_capacity: 256
+    s3_lru_cache: 512
   oss:
     endpoint: 127.0.0.1:9000
-    access_key: admin
-    secret_key: Ecbox2022!
+    access_key: minioadmin
+    secret_key: minioadmin
     region: "cn-north-1"
-  node_name: node1
+  node_name: node2

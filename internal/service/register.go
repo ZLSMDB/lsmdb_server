@@ -7,48 +7,52 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 
 	pb "github.com/ZLSMDB/lsmdb_server/api/register/v1"
+	"github.com/ZLSMDB/lsmdb_server/internal/biz"
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/go-kratos/kratos/v2/log"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type RegisterService struct {
 	pb.UnimplementedRegisterServer
-	conf *conf.Bootstrap
-	log  *log.Helper
+	conf   *conf.Bootstrap
+	etcdUc *biz.EtcdUsecase
+	log    *log.Helper
 }
 
-func NewRegisterService(conf *conf.Bootstrap, logger log.Logger) *RegisterService {
-	srv := &RegisterService{conf: conf, log: log.NewHelper(logger)}
+func NewRegisterService(conf *conf.Bootstrap, etcdUc *biz.EtcdUsecase, logger log.Logger) *RegisterService {
+	srv := RegisterService{conf: conf, etcdUc: etcdUc, log: log.NewHelper(logger)}
 	// nodeIPAddr, err := getIpAddr(srv.conf.Server.Grpc.Addr)
-	// nodeIPAddr, err := getIPPort(srv.conf.Server.Grpc.Addr, srv.conf.Data.NodeName)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// leaseID, err := srv.etcdUc.Grant(10) // 设置租约时间为10秒
-	// if err != nil {
-	// 	srv.log.Errorf("grant lease ID fail:", err)
-	// 	panic(err)
-	// } /*  */
-	// err = srv.etcdUc.Put(fmt.Sprintf("node/%s", srv.conf.Data.NodeName), nodeIPAddr, clientv3.WithLease(leaseID))
-	// if err != nil {
-	// 	srv.log.Errorf("Failed to register node:", err)
-	// 	panic(err)
-	// }
-	// srv.log.Infof("Node %s registered with IP %s", srv.conf.Data.NodeName, nodeIPAddr)
-	// // 定时发送心跳
-	// go func() {
-	// 	for {
-	// 		err := srv.etcdUc.KeepAliveOnce(leaseID)
-	// 		if err != nil {
-	// 			srv.log.Errorf("Failed to send heartbeat:", err)
-	// 		}
-	// 		time.Sleep(5 * time.Second) // 每隔5秒发送一次心跳
-	// 	}
-	// }()
+	nodeIPAddr, err := getIPPort(srv.conf.Server.Grpc.Addr, srv.conf.Data.NodeName)
+	if err != nil {
+		panic(err)
+	}
+	leaseID, err := srv.etcdUc.Grant(10) // 设置租约时间为10秒
+	if err != nil {
+		srv.log.Errorf("grant lease ID fail:", err)
+		panic(err)
+	} /*  */
+	err = srv.etcdUc.Put(fmt.Sprintf("node/%s", srv.conf.Data.NodeName), nodeIPAddr, clientv3.WithLease(leaseID))
+	if err != nil {
+		srv.log.Errorf("Failed to register node:", err)
+		panic(err)
+	}
+	srv.log.Infof("Node %s registered with IP %s\n", srv.conf.Data.NodeName, nodeIPAddr)
 	// 定时发送心跳
-	return srv
+	go func() {
+		for {
+			err := srv.etcdUc.KeepAliveOnce(leaseID)
+			if err != nil {
+				srv.log.Errorf("Failed to send heartbeat:", err)
+			}
+			time.Sleep(5 * time.Second) // 每隔5秒发送一次心跳
+		}
+	}()
+	// 定时发送心跳
+	return &srv
 }
 
 func (s *RegisterService) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterReply, error) {

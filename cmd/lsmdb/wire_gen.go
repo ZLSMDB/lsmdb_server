@@ -14,7 +14,7 @@ import (
 	"github.com/ZLSMDB/lsmdb_server/internal/service"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/tecbot/gorocksdb"
+	"github.com/linxGnu/grocksdb"
 	"github.com/tsandl/skvdb/leveldb"
 )
 
@@ -25,22 +25,25 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.Data, logger log.Logger, db *leveldb.DB, gorocksdbDB *gorocksdb.DB) (*kratos.App, func(), error) {
-	dbRepo, err := data.NewRepo(confData, db, gorocksdbDB, logger)
+func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.Data, logger log.Logger, db *leveldb.DB, grocksdbDB *grocksdb.DB) (*kratos.App, func(), error) {
+	dbRepo, err := data.NewRepo(confData, db, grocksdbDB, logger)
 	if err != nil {
 		return nil, nil, err
 	}
 	levelDBUsecase := biz.NewLevelDBUsecase(dbRepo, logger)
+	client := data.NewEtcdCli(confData)
 	s3 := data.NewS3Cli(confData)
-	client := data.NewRedisCli(confData)
-	dataData, cleanup, err := data.NewData(s3, client, logger)
+	redisClient := data.NewRedisCli(confData)
+	dataData, cleanup, err := data.NewData(client, s3, redisClient, logger)
 	if err != nil {
 		return nil, nil, err
 	}
 	ossRepo := data.NewOssRepo(dataData, logger)
 	ossUsecase := biz.NewOssUsecase(ossRepo, logger)
 	lsmdbService := service.NewLsmdbService(levelDBUsecase, logger, ossUsecase, bootstrap)
-	registerService := service.NewRegisterService(bootstrap, logger)
+	etcdRepo := data.NewEtcdRepo(dataData, logger)
+	etcdUsecase := biz.NewEtcdUsecase(etcdRepo, logger)
+	registerService := service.NewRegisterService(bootstrap, etcdUsecase, logger)
 	grpcServer := server.NewGRPCServer(confServer, lsmdbService, registerService, logger)
 	httpServer := server.NewHTTPServer(confServer, lsmdbService, registerService, logger)
 	httpGinServer := server.NewHTTPGINServer(confServer, lsmdbService, registerService, logger)
