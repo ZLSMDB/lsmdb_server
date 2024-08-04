@@ -1,12 +1,12 @@
 server:
   http:
-    addr: 0.0.0.0:8014
+    addr: 0.0.0.0:8024
     timeout: 1s
   grpc:
-    addr: 0.0.0.0:9014
+    addr: 0.0.0.0:9024
     timeout: 1s
   httpgin:
-    addr: 0.0.0.0:8015
+    addr: 0.0.0.0:8025
     timeout: 1s
 data:
   dbtype: rocksdb
@@ -23,8 +23,8 @@ data:
     #cluster_addrs: ["10.176.34.134:2379", "10.176.34.135:2379", "10.176.34.140:2379"]
     cluster_addrs: ["127.0.0.1:2379"]
   leveldb:
-    cache_dir: "/data/lsmdb/tmps/"
-    temp_dir: "/dbs/"
+    data_dir: "/data/lsmdb/tmps/"
+    temp_dir: "/db1/"
     block_size: 256
     compaction_table_size: 256
     iterator_sampling_rate: 4
@@ -36,4 +36,4 @@ data:
     access_key: minioadmin
     secret_key: minioadmin
     region: "cn-north-1"
-  node_name: node1
+  node_name: node2

@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/aws/aws-sdk-go/aws"
@@ -77,7 +78,8 @@ func (repo *rocksdbRepo) NewLevelDBCli(bucketName string) error {
 	repo.ro = gorocksdb.NewDefaultReadOptions()
 	repo.wo = gorocksdb.NewDefaultWriteOptions()
 	var err error
-	repo.rocksdb, err = gorocksdb.OpenDb(repo.opts, bucketName)
+	path := fmt.Sprintf("%s%s", repo.conf.Leveldb.DataDir, bucketName)
+	repo.rocksdb, err = gorocksdb.OpenDb(repo.opts, path)
 	return err
 
 }

@@ -9,7 +9,7 @@ server:
     addr: 0.0.0.0:8005
     timeout: 1s
 data:
-  dbtype: leveldb
+  dbtype: rocksdb
   database:
     driver: mysql
     source: root:root@tcp(127.0.0.1:3306)/test
@@ -23,7 +23,7 @@ data:
     #cluster_addrs: ["10.176.34.134:2379", "10.176.34.135:2379", "10.176.34.140:2379"]
     cluster_addrs: ["127.0.0.1:2379"]
   leveldb:
-    cache_dir: "/data/lsmdb/tmps/"
+    data_dir: "/data/lsmdb/tmps/"
     temp_dir: "/db/"
     block_size: 256
     compaction_table_size: 256
@@ -36,4 +36,4 @@ data:
     access_key: minioadmin
     secret_key: minioadmin
     region: "cn-north-1"
-  node_name: nodes
+  node_name: node1
