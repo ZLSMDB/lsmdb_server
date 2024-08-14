@@ -4,7 +4,7 @@ server:
     timeout: 1s
   grpc:
     addr: 0.0.0.0:9004
-    timeout: 1s
+    timeout: 600s
   httpgin:
     addr: 0.0.0.0:8005
     timeout: 1s

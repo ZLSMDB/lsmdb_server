@@ -4,7 +4,7 @@ server:
     timeout: 1s
   grpc:
     addr: 0.0.0.0:9024
-    timeout: 1s
+    timeout: 600s
   httpgin:
     addr: 0.0.0.0:8025
     timeout: 1s
@@ -23,7 +23,7 @@ data:
     #cluster_addrs: ["10.176.34.134:2379", "10.176.34.135:2379", "10.176.34.140:2379"]
     cluster_addrs: ["127.0.0.1:2379"]
   leveldb:
-    data_dir: "/data/lsmdb/tmps/"
+    data_dir: "/data/lsmdb/tmps/goofys/"
     temp_dir: "/db1/"
     block_size: 256
     compaction_table_size: 256

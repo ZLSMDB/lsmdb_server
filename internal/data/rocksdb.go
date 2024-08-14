@@ -3,6 +3,7 @@ package data
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/ZLSMDB/lsmdb_server/internal/conf"
 	"github.com/aws/aws-sdk-go/aws"
@@ -88,13 +89,53 @@ func (repo *rocksdbRepo) Set(key string, value []byte) error {
 	return repo.rocksdb.Put(repo.wo, []byte(key), value)
 }
 
+// 对象池，用于重用内存
+var bufPool = sync.Pool{
+	New: func() interface{} {
+		return make([]byte, 0, 1024) // 假设值的平均大小为1024字节
+	},
+}
+
 func (repo *rocksdbRepo) Get(key string) ([]byte, error) {
 	value, err := repo.rocksdb.Get(repo.ro, []byte(key))
 	if err != nil {
 		return nil, err
 	}
-	defer value.Free()
-	return value.Data(), nil
+	// defer value.Free()
+	// // 将数据复制到字节切片中
+	// data := make([]byte, len(value.Data()))
+	// copy(data, value.Data())
+
+	// 检查值是否为nil以避免解引用nil指针
+	if value == nil {
+		return nil, nil
+	}
+
+	// 获取值的数据
+	data := value.Data()
+	dataSize := len(data)
+
+	// 从对象池获取缓冲区
+	buf := bufPool.Get().([]byte)
+
+	// 如果缓冲区不足以容纳数据，则分配新的缓冲区
+	if cap(buf) < dataSize {
+		buf = make([]byte, dataSize)
+	} else {
+		buf = buf[:dataSize]
+	}
+
+	// 复制数据到缓冲区
+	copy(buf, data)
+
+	// 释放原始值的内存
+	value.Free()
+
+	// 归还缓冲区到池中
+	defer bufPool.Put(buf[:0])
+
+	// 返回复制的数据
+	return buf, nil
 }
 
 func (repo *rocksdbRepo) Del(key string) error {
