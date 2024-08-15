@@ -40,6 +40,13 @@ service Lsmdb {
     };
   }
 
+   rpc BatchPut (BatchPutRequest) returns (BatchPutReply) {
+    option (google.api.http) = {
+      post: "/batchput"
+      body: "*"
+    };
+  }
+
   rpc PutStr (PutStrRequest) returns (PutStrReply) {
     option (google.api.http) = {
       post: "/putstr"
@@ -89,6 +96,15 @@ service Lsmdb {
       post: "/GetKVs"
     };
   }
+}
+
+message BatchPutRequest {
+  repeated string keys = 1;
+  repeated bytes values = 2;
+}
+
+message BatchPutReply {
+  bool data = 1;
 }
 
 message GetKVsRequest {

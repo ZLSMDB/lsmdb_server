@@ -141,6 +141,16 @@ func (l *leveldbRepo) Set(key string, value []byte) error {
 	return l.leveldb.Put([]byte(key), []byte(value), nil)
 }
 
+func (l *leveldbRepo) BatchSet(keys []string, values [][]byte) error {
+
+	for i := 0; i < len(keys); i++ {
+		if err := l.leveldb.Put([]byte(keys[i]), values[i], nil); err != nil {
+			return err // 如果发生错误，立即返回
+		}
+	}
+	return nil
+}
+
 // 读取数据
 func (l *leveldbRepo) Get(key string) ([]byte, error) {
 	data, err := l.leveldb.Get([]byte(key), nil)

@@ -89,6 +89,37 @@ func (repo *rocksdbRepo) Set(key string, value []byte) error {
 	return repo.rocksdb.Put(repo.wo, []byte(key), value)
 }
 
+func (repo *rocksdbRepo) BatchSets(keys []string, values [][]byte) error {
+	for i := 0; i < len(keys); i++ {
+		// err = repo.rocksdb.Put(repo.wo, []byte(keys[i]), values[i])
+		if err := repo.rocksdb.Put(repo.wo, []byte(keys[i]), values[i]); err != nil {
+			return err // 如果发生错误，立即返回
+		}
+	}
+	return nil
+}
+
+func (repo *rocksdbRepo) BatchSet(keys []string, values [][]byte) error {
+
+	writeBatch := gorocksdb.NewWriteBatch()
+	defer writeBatch.Destroy() // 确保在函数结束时销毁 WriteBatch
+	for i := 0; i < len(keys); i++ {
+		writeBatch.Put([]byte(keys[i]), values[i])
+	}
+
+	// 创建写入选项
+	writeOpts := gorocksdb.NewDefaultWriteOptions()
+	defer writeOpts.Destroy() // 确保在函数结束时销毁写入选项
+
+	// 批量写入
+	if err := repo.rocksdb.Write(writeOpts, writeBatch); err != nil {
+		log.Fatalf("Failed to write batch: %v", err)
+	}
+
+	repo.log.Info("Batch write successful!")
+	return nil
+}
+
 // 对象池，用于重用内存
 var bufPool = sync.Pool{
 	New: func() interface{} {

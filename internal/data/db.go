@@ -14,6 +14,7 @@ type DBType int
 type DBRepo interface {
 	NewLevelDBCli(bucketName string) error
 	Set(key string, value []byte) error
+	BatchSet(keys []string, values [][]byte) error
 	Get(key string) ([]byte, error)
 	Del(key string) error
 	State(value string) (string, error)

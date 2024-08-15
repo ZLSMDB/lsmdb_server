@@ -39,6 +39,10 @@ func (s *LevelDBUsecase) Set(key string, value []byte) error {
 	return s.repo.Set(key, value)
 }
 
+func (s *LevelDBUsecase) BatchSet(keys []string, values [][]byte) error {
+	return s.repo.BatchSet(keys, values)
+}
+
 func (s *LevelDBUsecase) Get(key string) ([]byte, error) {
 	return s.repo.Get(key)
 }

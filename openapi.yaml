@@ -65,6 +65,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /batchput:
+        post:
+            tags:
+                - Lsmdb
+            operationId: Lsmdb_BatchPut
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/BatchPutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BatchPutReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /close:
         get:
             tags:
@@ -263,6 +287,23 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
+        BatchPutReply:
+            type: object
+            properties:
+                data:
+                    type: boolean
+        BatchPutRequest:
+            type: object
+            properties:
+                keys:
+                    type: array
+                    items:
+                        type: string
+                values:
+                    type: array
+                    items:
+                        type: string
+                        format: bytes
         CloseDBReply:
             type: object
             properties: {}

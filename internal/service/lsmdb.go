@@ -63,6 +63,16 @@ func (s *LsmdbService) Put(ctx context.Context, req *pb.PutRequest) (*pb.PutRepl
 	return &pb.PutReply{Data: true}, nil
 }
 
+func (s *LsmdbService) BatchPut(ctx context.Context, req *pb.BatchPutRequest) (*pb.BatchPutReply, error) {
+
+	err := s.uc.BatchSet(req.Keys, req.Values)
+	if err != nil {
+		s.log.Errorf("put key-value fail")
+		return &pb.BatchPutReply{Data: false}, err
+	}
+	return &pb.BatchPutReply{Data: true}, nil
+}
+
 /*
 	func (s *LsmdbService) PutStr(ctx context.Context, req *pb.PutStrRequest) (*pb.PutStrReply, error) {
 		// 分流调用oss存储大文件，需要记录当前bucketname的名字, etcd中存储格式为{key: data{dbname, bucketname}}

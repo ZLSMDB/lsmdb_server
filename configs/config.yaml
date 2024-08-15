@@ -23,7 +23,7 @@ data:
     #cluster_addrs: ["10.176.34.134:2379", "10.176.34.135:2379", "10.176.34.140:2379"]
     cluster_addrs: ["127.0.0.1:2379"]
   leveldb:
-    cache_dir: "/data/lsmdb/tmps/"
+    cache_dir: "/data/lsmdb/"
     temp_dir: "/dbs/"
     block_size: 256
     compaction_table_size: 256
