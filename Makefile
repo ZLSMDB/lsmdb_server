@@ -46,6 +46,14 @@ api:
 	       --openapi_out=fq_schema_naming=true,default_response=false:. \
 	       $(API_PROTO_FILES)
 
+apicplusplus:
+	protoc --proto_path=./api \
+       --proto_path=./third_party \
+       --cpp_out=./api \
+       --grpc_out=./api \
+       --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` \
+       $(API_PROTO_FILES)
+
 .PHONY: build
 # build
 build:
